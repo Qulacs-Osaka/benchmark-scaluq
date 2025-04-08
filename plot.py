@@ -4,23 +4,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
-liblist = ["scaluq", "qulacs", "yao", "qiskit", "projectq", "quest", "qibo", "intelqs", "qxsimulator"]
-liblegend = ["Scaluq", "Qulacs", "Yao", "Qiskit", "ProjectQ", "PyQuEST-cffi", "Qibo", "Intel-QS", "qxelerator"]
+liblist = ["scaluq", "qulacs", "qiskit", "pennylane", "cuStateVec"]
+liblegend = ["Scaluq", "Qulacs", "Qiskit", "PennyLane", "cuStateVec"]
 
 
 def load(folder_name):
     filepaths = []
 
     for libname in liblist:
-        if libname != "yao":
-            path = f"./benchmark/{folder_name}/{libname}/.benchmarks/*/*.json"
-        else:
-            path = f"./benchmark/{folder_name}/{libname}/data/*.json"
+        path = f"./benchmark/{folder_name}/{libname}/data/*.json"
         flist = glob.glob(path)
         flist = [fname.replace("\\", "/") for fname in flist]
-        # pick latest one
-        if libname != "yao":
-            flist.sort(key=lambda x: int(x.split("/")[-1].split("_")[0]), reverse=True)
         if len(flist) > 0:
             filepaths.append((libname, flist[0]))
 
@@ -41,18 +35,7 @@ def load(folder_name):
                 # print(key)
                 dat[key][nqubits] = float(stats["min"])
 
-        def fetch_yao(dat, data):
-            # print(data.keys())
-            d = data["QCBM"]
-            nqubits = d["nqubits"]
-            times = d["times"]
-            for ind, nq in enumerate(nqubits):
-                dat["yao"][nq] = times[ind] / 1e9
-
-        if filepath[0] == "yao":
-            fetch_yao(dat, data)
-        else:
-            fetch_normal(filepath[0], dat, data)
+        fetch_normal(filepath[0], dat, data)
 
     # import pprint
     # pprint.pprint(dat.keys())
@@ -68,12 +51,12 @@ def plot(dat):
         if len(hit) == 0:
             continue
         cid = liblist.index(name)
-        lw = 2 if name == "qulacs" else 1
+        lw = 2 if name == "scaluq" else 1
 
         legend = liblegend[ind]
-        ls = "--" if name in ["qulacs", "qiskit"] else "-"
+        ls = "--" if name in ["scaluq", "qulacs", "qiskit"] else "-"
 
-        if name not in ["qulacs", "qiskit"]:
+        if name not in ["scaluq", "qulacs", "qiskit"]:
             fil = np.array(list(dat[name].items())).T
             plt.plot(fil[0], fil[1], ".-", label=legend, c=cmap(cid), linestyle=ls, linewidth=lw)
         elif name in ["qulacs"]:
@@ -89,7 +72,14 @@ def plot(dat):
             plt.plot(fil[0], fil[1], ".-", label=legend, c=cmap(cid), linestyle=ls, linewidth=lw)
             fil = np.array(list(dat[name + "optexc"].items())).T
             plt.plot(fil[0], fil[1], ".-", label=legend + " with opt", c=cmap(cid), linestyle="-", linewidth=lw)
-
+        elif name in ["scaluq"]:
+            fil = np.array(list(dat[name].items())).T
+            plt.plot(fil[0], fil[1], ".-", label=legend, c=cmap(cid), linestyle=ls, linewidth=lw)
+            fil = np.array(list(dat[name + "opt"].items())).T
+            plt.plot(fil[0], fil[1], ".-", label=legend + " with opt", c=cmap(cid), linestyle="-", linewidth=lw)
+            if name + "opt4" in dat:
+                fil = np.array(list(dat[name + "opt4"].items())).T
+                plt.plot(fil[0], fil[1], ".-", label=legend + " with heavy opt", c=cmap(cid), linestyle="-.", linewidth=lw)
         cnt += 1
 
     plt.yscale("log")
@@ -102,7 +92,7 @@ def plot(dat):
 
 
 def plot_ratio(dat):
-    fil = np.array(list(dat["qulacs"].items())).T
+    fil = np.array(list(dat["scaluq"].items())).T
     base = fil[1]
     cmap = plt.get_cmap("tab10")
     cnt = 0
@@ -114,9 +104,9 @@ def plot_ratio(dat):
         lw = 2 if name == "qulacs" else 1
 
         legend = liblegend[ind]
-        ls = "--" if name in ["qulacs", "qiskit"] else "-"
+        ls = "--" if name in ["scaluq", "qulacs", "qiskit"] else "-"
 
-        if name not in ["qulacs", "qiskit"]:
+        if name not in ["scaluq", "qulacs", "qiskit"]:
             fil = np.array(list(dat[name].items())).T
             plt.plot(fil[0], np.array(fil[1]) / base, ".-", label=legend, c=cmap(cid), linestyle=ls, linewidth=lw)
         elif name in ["qulacs"]:
@@ -132,7 +122,14 @@ def plot_ratio(dat):
             plt.plot(fil[0], np.array(fil[1]) / base, ".-", label=legend, c=cmap(cid), linestyle=ls, linewidth=lw)
             fil = np.array(list(dat[name + "optexc"].items())).T
             plt.plot(fil[0], np.array(fil[1]) / base, ".-", label=legend + " with opt", c=cmap(cid), linestyle="-", linewidth=lw)
-
+        elif name in ["scaluq"]:
+            fil = np.array(list(dat[name].items())).T
+            plt.plot(fil[0], np.array(fil[1]) / base, ".-", label=legend, c=cmap(cid), linestyle=ls, linewidth=lw)
+            fil = np.array(list(dat[name + "opt"].items())).T
+            plt.plot(fil[0], np.array(fil[1]) / base, ".-", label=legend + " with opt", c=cmap(cid), linestyle="-", linewidth=lw)
+            if name + "opt4" in dat:
+                fil = np.array(list(dat[name + "opt4"].items())).T
+                plt.plot(fil[0], np.array(fil[1]) / base, ".-", label=legend + " with heavy opt", c=cmap(cid), linestyle="-.", linewidth=lw)
         cnt += 1
 
     plt.yscale("log")
