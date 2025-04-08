@@ -37,3 +37,8 @@ These results are available in the `batch/` directory.
 - `image/`: Plots generated from benchmark results
 - `plot.py`: Script to generate plots from output data
 
+## setup
+## requirements
+- nvidia-container-toolkitを入れてください
+## build
+- build_run_container.shを実行したらOK
