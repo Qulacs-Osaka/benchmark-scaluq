@@ -10,6 +10,7 @@ max_parallel_threads = 16
 gpu = True
 method = "statevector" if not gpu else "statevector_gpu"
 
+nqubits_list = range(4, 26)
 
 def native_execute(benchmark, circuit, fusion_enable, include_compile_time):
     backend_options = {
@@ -85,11 +86,8 @@ def generate_qcbm_circuit(nqubits, depth, pairs):
     return circuit
 
 
-nqubit_list = range(4, 26)
-
-
 """
-@pytest.mark.parametrize('nqubits', nqubit_list)
+@pytest.mark.parametrize('nqubits', nqubits_list)
 def test_qcbm_gf_inc(benchmark, nqubits):
     benchmark.group = "QCBMoptinc"
     pairs = [(i, (i + 1) % nqubits) for i in range(nqubits)]
@@ -98,7 +96,7 @@ def test_qcbm_gf_inc(benchmark, nqubits):
 """
 
 
-@pytest.mark.parametrize('nqubits', nqubit_list)
+@pytest.mark.parametrize('nqubits', nqubits_list)
 def test_qcbm_gf_exc(benchmark, nqubits):
     benchmark.group = "QCBMoptexc"
     pairs = [(i, (i + 1) % nqubits) for i in range(nqubits)]
@@ -107,7 +105,7 @@ def test_qcbm_gf_exc(benchmark, nqubits):
 
 
 """
-@pytest.mark.parametrize('nqubits', nqubit_list)
+@pytest.mark.parametrize('nqubits', nqubits_list)
 def test_qcbm_nogf_inc(benchmark, nqubits):
     benchmark.group = "QCBMinc"
     pairs = [(i, (i + 1) % nqubits) for i in range(nqubits)]
@@ -116,7 +114,7 @@ def test_qcbm_nogf_inc(benchmark, nqubits):
 """
 
 
-@pytest.mark.parametrize('nqubits', nqubit_list)
+@pytest.mark.parametrize('nqubits', nqubits_list)
 def test_qcbm_nogf_exc(benchmark, nqubits):
     benchmark.group = "QCBMexc"
     pairs = [(i, (i + 1) % nqubits) for i in range(nqubits)]
