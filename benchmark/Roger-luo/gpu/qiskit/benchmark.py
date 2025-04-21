@@ -1,22 +1,21 @@
-
-
 import pytest
 import numpy as np
 import uuid
-from qiskit import Aer, QuantumCircuit, execute
-from qiskit.compiler import transpile, assemble
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+from qiskit.compiler import transpile
 
-max_parallel_threads = 16
+max_parallel_threads = 24
 gpu = True
-method = "statevector" if not gpu else "statevector_gpu"
 
 
 def native_execute(benchmark, circuit, fusion_enable, include_compile_time):
     backend_options = {
-        "method": method,
+        "method": "statevector",
+        "device": "GPU" if gpu else "CPU",
         "precision": "double",
+        "enable_truncation": False,
         "max_parallel_threads": max_parallel_threads,
-        "truncate_enable": False,
         "fusion_enable": True,
         "fusion_threshold": 14,
         "fusion_max_qubit": 5,
@@ -26,27 +25,21 @@ def native_execute(benchmark, circuit, fusion_enable, include_compile_time):
         backend_options["fusion_threshold"] = 30
         backend_options["fusion_max_qubit"] = 0
 
-    backend = Aer.get_backend("statevector_simulator")
+    backend = AerSimulator()
     backend.set_options(**backend_options)
 
-    def evalfunc_include(backend, circuit, backend_options):
+    def evalfunc_include(backend, circuit):
         experiment = transpile(circuit, backend=backend)
-        qobj = assemble(experiment, backend=backend, shot=1, memory_slot_size=100)
-        qobj_aer = backend._format_qobj(qobj, backend_options)
-        qobj_dict = qobj_aer.to_dict()
-        backend._controller(qobj_dict)
+        backend.run(experiment, shots=1)
 
-    def evalfunc_exclude(backend, qobj_dict):
-        backend._controller(qobj_dict)
+    def evalfunc_exclude(backend, experiment):
+        backend.run(experiment, shots=1)
 
     if include_compile_time:
-        benchmark(evalfunc_include, backend, circuit, backend_options)
+        benchmark(evalfunc_include, backend, circuit)
     else:
         experiment = transpile(circuit, backend=backend)
-        qobj = assemble(experiment, backend=backend, shot=1, memory_slot_size=100)
-        qobj_aer = backend._format_qobj(qobj, backend_options)
-        qobj_dict = qobj_aer.to_dict()
-        benchmark(evalfunc_exclude, backend, qobj_dict)
+        benchmark(evalfunc_exclude, backend, experiment)
 
 
 def first_rotation(circuit, nqubits):
