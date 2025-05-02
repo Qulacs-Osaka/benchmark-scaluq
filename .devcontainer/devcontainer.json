@@ -1,0 +1,23 @@
+{
+    "name": "cuda-python-devcontainer",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "."
+    },
+    "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "python.defaultInterpreterPath": "/usr/bin/python3"
+    },
+    "extensions": [
+        "ms-python.python",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode.cpptools"
+    ],
+    "runArgs": [
+        "--gpus", "all"
+    ],
+    "waitFor": "containerStarted",
+    "postCreateCommand": "pip install --upgrade pip",
+    "remoteUser": "root",
+    "workspaceFolder": "/workspace"
+}

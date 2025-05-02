@@ -1,13 +1,13 @@
-FROM nvidia/cuda:12.6.0-devel-ubuntu22.04
+FROM nvidia/cuda:12.6.3-devel-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
     python3 python3-pip \
-    git
+    git cmake make
 
 #install tools for benchmark
-RUN pip install pytest pytest-benchmark mkl-service
+RUN pip install numpy pytest pytest-benchmark mkl-service
 
 # install qiskit
 RUN pip install "qiskit==1.1.0" "qiskit-aer-gpu==0.15.1" cuquantum-cu12 qulacs

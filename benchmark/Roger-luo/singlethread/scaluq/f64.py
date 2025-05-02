@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from scaluq import X, T, H, CNOT, ParametricRZ, ParametricRX, DenseMatrix
-from scaluq.f64.gate import *
+from scaluq.default.f64.gate import *
 
 # import mkl
 # mkl.set_num_threads(1)

@@ -5,17 +5,16 @@ import pennylane as qml
 # --- config ---
 max_parallel_threads = 16
 gpu = True
-# CPUシミュレータ → "lightning.qubit", GPUシミュレータ → "lightning.gpu"
 plugin = "lightning.gpu" if gpu else "lightning.qubit"
 
 nqubits_list = range(4, 26)
 
-def native_execute(benchmark, circuit, params):
+def native_execute(benchmark, circuit):
     def evalfunc(circuit, params):
         circuit(params)
     benchmark(evalfunc, circuit)
 
-def first_rotation(nqubits, params):
+def first_rotation(nqubits, params_first):
     qml.RX(params_first[0], range(nqubits))
     qml.RZ(params_first[1], range(nqubits))
 
@@ -47,3 +46,11 @@ def generate_qcbm_circuit(nqubits, depth, pairs):
         last_rotation(nqubits, params_last)
         return qml.state()
     circuit = qml.QNode(make_circuit, dev)
+    return circuit
+
+@pytest.mark.parametrize('nqubits', nqubits_list)
+def test_qcbm_gf_exc(benchmark, nqubits):
+    benchmark.group = "QCBMoptexc"
+    pairs = [(i, (i + 1) % nqubits) for i in range(nqubits)]
+    circuit = generate_qcbm_circuit(nqubits, 9, pairs)
+    native_execute(benchmark, circuit)
