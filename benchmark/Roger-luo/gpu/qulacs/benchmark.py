@@ -1,5 +1,3 @@
-
-
 import pytest
 import numpy as np
 import uuid
@@ -98,7 +96,7 @@ def test_qcbm_gf_inc(benchmark, nqubits):
 """
 
 
-@pytest.mark.parametrize('nqubits', nqubit_list)
+@pytest.mark.parametrize("nqubits", nqubit_list)
 def test_qcbm_gf_exc(benchmark, nqubits):
     benchmark.group = "QCBMoptexc"
     pairs = [(i, (i + 1) % nqubits) for i in range(nqubits)]
@@ -116,7 +114,7 @@ def test_qcbm_nogf_inc(benchmark, nqubits):
 """
 
 
-@pytest.mark.parametrize('nqubits', nqubit_list)
+@pytest.mark.parametrize("nqubits", nqubit_list)
 def test_qcbm_nogf_exc(benchmark, nqubits):
     benchmark.group = "QCBMexc"
     pairs = [(i, (i + 1) % nqubits) for i in range(nqubits)]
