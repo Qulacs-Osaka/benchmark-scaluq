@@ -1,0 +1,17 @@
+FROM nvidia/cuda:11.4.3-devel-ubuntu20.04
+# FROM nvidia/cuda:12.6.3-devel-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    python3 python3-pip \
+    git cmake make
+
+#install tools for benchmark
+RUN pip install numpy pytest pytest-benchmark mkl-service
+
+# install qulacs
+RUN pip install qulacs-gpu
+
+WORKDIR /workspace
+

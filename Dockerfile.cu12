@@ -16,8 +16,8 @@ RUN pip install "qiskit==1.1.0" "qiskit-aer-gpu==0.15.1" cuquantum-cu12 qulacs
 # install pennylane-lightning
 RUN pip install custatevec-cu12 pennylane-lightning-gpu
 
-# install scaluq
-# RUN pip install scaluq 
+# install qulacs
+RUN pip install qulacs-gpu qulacs
 
 WORKDIR /workspace
 

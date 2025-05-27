@@ -1,122 +1,76 @@
-
-
 import pytest
 import numpy as np
-import uuid
-from qiskit import Aer, QuantumCircuit, execute
-from qiskit.compiler import transpile, assemble
+from qulacs import QuantumCircuit, QuantumState
+from qulacs.gate import X, T, H, CNOT, ParametricRZ, ParametricRX, DenseMatrix
+from qulacs.circuit import QuantumCircuitOptimizer as QCO
 
-max_parallel_threads = 16
-gpu = True
-method = "statevector" if not gpu else "statevector_gpu"
+import mkl
+
+mkl.set_num_threads(1)
+
 
 nqubits_list = range(4, 26)
 
-def native_execute(benchmark, circuit, fusion_enable, include_compile_time):
-    backend_options = {
-        "method": method,
-        "precision": "double",
-        "max_parallel_threads": max_parallel_threads,
-        "truncate_enable": False,
-        "fusion_enable": True,
-        "fusion_threshold": 14,
-        "fusion_max_qubit": 5,
-    }
-    if not fusion_enable:
-        backend_options["fusion_enable"] = False
-        backend_options["fusion_threshold"] = 30
-        backend_options["fusion_max_qubit"] = 0
-
-    backend = Aer.get_backend("statevector_simulator")
-    backend.set_options(**backend_options)
-
-    def evalfunc_include(backend, circuit, backend_options):
-        experiment = transpile(circuit, backend=backend)
-        qobj = assemble(experiment, backend=backend, shot=1, memory_slot_size=100)
-        qobj_aer = backend._format_qobj(qobj, backend_options)
-        qobj_dict = qobj_aer.to_dict()
-        backend._controller(qobj_dict)
-
-    def evalfunc_exclude(backend, qobj_dict):
-        backend._controller(qobj_dict)
-
-    if include_compile_time:
-        benchmark(evalfunc_include, backend, circuit, backend_options)
-    else:
-        experiment = transpile(circuit, backend=backend)
-        qobj = assemble(experiment, backend=backend, shot=1, memory_slot_size=100)
-        qobj_aer = backend._format_qobj(qobj, backend_options)
-        qobj_dict = qobj_aer.to_dict()
-        benchmark(evalfunc_exclude, backend, qobj_dict)
-
 
 def first_rotation(circuit, nqubits):
-    circuit.rx(np.random.rand(), range(nqubits))
-    circuit.rz(np.random.rand(), range(nqubits))
-    return circuit
+    for k in range(nqubits):
+        circuit.add_RX_gate(k, np.random.rand())
+        circuit.add_RZ_gate(k, np.random.rand())
 
 
 def mid_rotation(circuit, nqubits):
-    circuit.rz(np.random.rand(), range(nqubits))
-    circuit.rx(np.random.rand(), range(nqubits))
-    circuit.rz(np.random.rand(), range(nqubits))
-    return circuit
+    for k in range(nqubits):
+        circuit.add_RZ_gate(k, np.random.rand())
+        circuit.add_RX_gate(k, np.random.rand())
+        circuit.add_RZ_gate(k, np.random.rand())
 
 
 def last_rotation(circuit, nqubits):
-    circuit.rz(np.random.rand(), range(nqubits))
-    circuit.rx(np.random.rand(), range(nqubits))
-    return circuit
+    for k in range(nqubits):
+        circuit.add_RZ_gate(k, np.random.rand())
+        circuit.add_RX_gate(k, np.random.rand())
 
 
-def entangler(circuit, pairs):
+def entangler(circuit, nqubits, pairs):
     for a, b in pairs:
-        circuit.cx(a, b)
-    return circuit
+        circuit.add_CNOT_gate(a, b)
 
 
-def generate_qcbm_circuit(nqubits, depth, pairs):
+def build_circuit(nqubits, depth, pairs):
     circuit = QuantumCircuit(nqubits)
     first_rotation(circuit, nqubits)
-    entangler(circuit, pairs)
-    for k in range(depth - 1):
+    entangler(circuit, nqubits, pairs)
+    for k in range(depth):
         mid_rotation(circuit, nqubits)
-        entangler(circuit, pairs)
+        entangler(circuit, nqubits, pairs)
+
     last_rotation(circuit, nqubits)
     return circuit
 
 
-"""
-@pytest.mark.parametrize('nqubits', nqubits_list)
-def test_qcbm_gf_inc(benchmark, nqubits):
-    benchmark.group = "QCBMoptinc"
+def benchfunc_noopt(circuit, nqubits):
+    st = QuantumState(nqubits)
+    circuit.update_quantum_state(st)
+
+
+def benchfunc(qco, circuit, nqubits):
+    st = QuantumState(nqubits)
+    qco.optimize_light(circuit)
+    circuit.update_quantum_state(st)
+
+
+@pytest.mark.parametrize("nqubits", nqubits_list)
+def test_QCBMopt(benchmark, nqubits):
+    benchmark.group = "QCBMopt"
     pairs = [(i, (i + 1) % nqubits) for i in range(nqubits)]
-    circuit = generate_qcbm_circuit(nqubits, 9, pairs)
-    native_execute(benchmark, circuit, fusion_enable=True, include_compile_time=True)
-"""
+    circuit = build_circuit(nqubits, 9, pairs)
+    qco = QCO()
+    benchmark(benchfunc, qco, circuit, nqubits)
 
 
-@pytest.mark.parametrize('nqubits', nqubits_list)
-def test_qcbm_gf_exc(benchmark, nqubits):
-    benchmark.group = "QCBMoptexc"
+@pytest.mark.parametrize("nqubits", nqubits_list)
+def test_QCBM(benchmark, nqubits):
+    benchmark.group = "QCBM"
     pairs = [(i, (i + 1) % nqubits) for i in range(nqubits)]
-    circuit = generate_qcbm_circuit(nqubits, 9, pairs)
-    native_execute(benchmark, circuit, fusion_enable=True, include_compile_time=False)
-
-
-"""
-@pytest.mark.parametrize('nqubits', nqubits_list)
-def test_qcbm_nogf_inc(benchmark, nqubits):
-    benchmark.group = "QCBMinc"
-    pairs = [(i, (i + 1) % nqubits) for i in range(nqubits)]
-    circuit = generate_qcbm_circuit(nqubits, 9, pairs)
-    native_execute(benchmark, circuit, fusion_enable=False, include_compile_time=True)
-"""
-
-
-@pytest.mark.parametrize('nqubits', nqubits_list)
-def test_qcbm_nogf_exc(benchmark, nqubits):
-    benchmark.group = "QCBMexc"
-    pairs = [(i, (i + 1) % nqubits) for i in range(nqubits)]
-    circuit = generate_qcbm_circuit(nqubits, 9, pairs)
-    native_execute(benchmark, circuit, fusion_enable=False, include_compile_time=False)
+    circuit = build_circuit(nqubits, 9, pairs)
+    benchmark(benchfunc_noopt, circuit, nqubits)
