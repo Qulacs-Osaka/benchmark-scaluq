@@ -1,8 +1,8 @@
 {
-    "name": "cuda-python-devcontainer",
+    "name": "cuda-12-devcontainer",
     "build": {
-        "dockerfile": "Dockerfile",
-        "context": "."
+        "dockerfile": "../Dockerfile.batch",
+        "context": ".."
     },
     "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
@@ -14,10 +14,9 @@
         "ms-vscode.cpptools"
     ],
     "runArgs": [
-        "--gpus", "all"
+        "--gpus",
+        "all"
     ],
     "waitFor": "containerStarted",
-    "postCreateCommand": "pip install --upgrade pip",
-    "remoteUser": "root",
-    "workspaceFolder": "/workspace"
+    "remoteUser": "root"
 }

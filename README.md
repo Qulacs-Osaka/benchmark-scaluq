@@ -2,7 +2,7 @@
 
 This repository contains source codes for benchmarking the execution times of 10-layer random quantum circuits with varying numbers of qubits.
 
-We compare [Scaluq](https://github.com/qulacs/scaluq) against several popular quantum circuit simulators that provide Python or Julia interfaces and support double-precision simulation.
+We compare [Scaluq](https://github.com/qulacs/scaluq) against several popular quantum circuit simulators that provide Python interfaces and support double-precision simulation.
 
 Execution times are measured under three settings:
 
