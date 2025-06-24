@@ -12,13 +12,13 @@ PARAMETRICZ_NAME = "paramz"
 # 論理的にはn_batch個の回路を使って状態ベクトルを更新する関数
 # 実際は1つの回路を用意して異なるパラメータでゲート列を実行
 def create_circuit(
-    n_qubits: int, depth: int, n_batch: int
+    n_qubits: int, n_layers: int, n_batch: int
 ) -> tuple[QuantumCircuit, dict]:
     params = dict()
     rng = np.random.default_rng(12345)
     cnt = 0
     circuit = QuantumCircuit(n_qubits, n_batch)
-    for _ in range(depth):
+    for _ in range(n_layers):
         for i in range(n_qubits):
             circuit.add_gate(CX(i, (i + 1) % n_qubits))
             circuit.add_gate(ParametricRX(i))
@@ -33,7 +33,7 @@ def create_circuit(
     return (circuit, params)
 
 # 同じ形で異なるパラメータの回路を適用させる
-def bench(n_qubits: int, depth: int, n_batch: int):
-    circuit, params = create_circuit(n_qubits, depth, n_batch)
+def bench(n_qubits: int, n_layers: int, n_batch: int):
+    circuit, params = create_circuit(n_qubits, n_layers, n_batch)
     batched_state = BatchedStateVector(n_qubits, n_batch)
     circuit.update(batched_state, params)
