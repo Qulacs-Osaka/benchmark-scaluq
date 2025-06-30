@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
-from scaluq import X, T, H, CNOT, ParametricRZ, ParametricRX, DenseMatrix
+# from scaluq import X, T, H, CNOT, ParametricRZ, ParametricRX, DenseMatrix
+from scaluq.default.f64 import *
 from scaluq.default.f64.gate import *
 
 # import mkl
@@ -28,7 +29,7 @@ def last_rotation(circuit, nqubits):
 
 def entangler(circuit, nqubits, pairs):
     for a, b in pairs:
-        circuit.add_gate(CNOT(a, b))
+        circuit.add_gate(CNot(a, b))
 
 def build_circuit(nqubits, depth, pairs):
     circuit = Circuit(nqubits)
