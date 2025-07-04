@@ -1,12 +1,11 @@
 import json
 import glob
-import numpy as np
 import matplotlib.pyplot as plt
 from collections import defaultdict
 import os
 
-libs = ["scaluq"]
-libnames = ["Sclauq"]
+libs = ["scaluq", "qulacs", "qiskit-aer"]
+libnames = ["Sclauq", "Qulacs", "Qiskit-Aer"]
 
 def load():
     filepaths = []
@@ -16,8 +15,11 @@ def load():
         flist = glob.glob(path)
         for filepath in flist:
             libname = libnames[libidx]
-            prec = os.path.basename(filepath)[:-5]
-            filepaths.append((f'{libname} ({prec})', filepath))
+            if lib == "scaluq":
+                prec = os.path.basename(filepath)[:-5]
+                filepaths.append((f'{libname} ({prec})', filepath))
+            else:
+                filepaths.append((f'{libname}', filepath))
 
     dat = defaultdict(lambda: defaultdict(dict))
     for name, filepath in filepaths:
@@ -40,7 +42,10 @@ def plot(dat, group):
     for name in dat_group:
         xs = list(sorted(dat_group[name].keys()))
         ys = [dat_group[name][x] for x in xs]
-        cid = libnames.index(name[:name.index(' ')])
+        if name.count('('):
+            cid = libnames.index(name[:name.index(' ')])
+        else:
+            cid = libnames.index(name)
         plt.plot(xs, ys, label=name, c=cmap(cid))
 
     plt.title(f"{group}")
