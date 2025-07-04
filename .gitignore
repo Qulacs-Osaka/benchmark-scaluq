@@ -132,3 +132,5 @@ dmypy.json
 .pyre/
 
 .benchmarks
+
+benchmark/single-gate/**/*.json
