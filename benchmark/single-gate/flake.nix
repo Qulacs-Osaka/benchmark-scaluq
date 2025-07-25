@@ -63,6 +63,7 @@
             rev = "refs/tags/${version}";
             sha256 = "sha256-WHfsl/T4lmnvkGY7gF5PStilGq3G66TZG9oB1tKwuOQ=";
           };
+          format = "setuptools";
           nativeBuildInputs = with pkgs; [
             python312Full
             python312Packages.setuptools-rust
