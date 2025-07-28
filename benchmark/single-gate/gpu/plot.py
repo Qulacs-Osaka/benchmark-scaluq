@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import os
 
-libs = ["scaluq", "qulacs", "qiskit-aer"]
-libnames = ["Sclauq", "Qulacs", "Qiskit-Aer"]
+libs = ["scaluq", "qulacs", "qiskit-aer", "qiskit-aer-custatevec"]
+libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Qiskit-Aer (cuStateVec)"]
 
 def load():
     filepaths = []
