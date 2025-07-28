@@ -54,7 +54,7 @@ single_params = create_params(single_gates)
 def test_Single(benchmark, name, factory, nqubits):
     benchmark.group = name
     gate = factory(random.randint(0, nqubits - 1))
-    state = qulacs.StateVector(nqubits)
+    state = qulacs.StateVectorGpu(nqubits)
     state.set_Haar_random_state()
     benchmark(benchfunc, gate, state)
 
@@ -63,7 +63,7 @@ single_angle_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), iterto
 def test_SingleAngle(benchmark, name, factory, nqubits):
     benchmark.group = name
     gate = factory(random.randint(0, nqubits - 1), random.random() * math.pi * 2)
-    state = qulacs.StateVector(nqubits)
+    state = qulacs.StateVectorGpu(nqubits)
     state.set_Haar_random_state()
     benchmark(benchfunc, gate, state)
 
@@ -76,6 +76,6 @@ def test_Double(benchmark, name, factory, nqubits):
     if(t2 == t1):
         t2 = nqubits - 1
     gate = factory(t1, t2)
-    state = qulacs.StateVector(nqubits)
+    state = qulacs.StateVectorGpu(nqubits)
     state.set_Haar_random_state()
     benchmark(benchfunc, gate, state)
