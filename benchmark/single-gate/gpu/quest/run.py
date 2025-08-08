@@ -39,13 +39,13 @@ double_gates = [
     ("2 qubits dense", dense2)
 ]
 
-nqubits_list = range(4, 20)
+nqubits_list = range(4, 28)
 
 
 def benchfunc(op, reg):
     reg.apply_operator(op)
 
-def create_params(gates: list[tuple[str, Callable[..., pyquest.BaseOperator]]]):
+def create_params(gates: list[tuple[str, Callable[..., pyquest.operators.BaseOperator]]]):
     return map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(gates, nqubits_list))
 
 single_params = create_params(single_gates)

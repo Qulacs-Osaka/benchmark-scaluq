@@ -38,7 +38,7 @@ double_gates = [
     ("2 qubits dense", dense2)
 ]
 
-nqubits_list = range(4, 20)
+nqubits_list = range(4, 27)
 
 
 def benchfunc(qc):
