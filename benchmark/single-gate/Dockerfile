@@ -71,3 +71,10 @@ RUN rm -r /tmp/scaluq
 
 # install custatevec
 RUN uv run --no-project python -m pip install --break-system-packages cupy-cuda12x cuquantum-python-cu12 custatevec-cu12
+
+# install QuEST
+RUN git clone https://github.com/rrmeister/pyquest -b develop --depth=1 --recursive /tmp/pyquest
+RUN cd /tmp/pyquest && \
+    sed -i -e "s/'gpu_accelerated': False,/'gpu_accelerated': True,/" -e "s/'gpu_compute_capability': None,/'gpu_compute_capability': 80,/" setup.py && \
+    pip install .
+    
