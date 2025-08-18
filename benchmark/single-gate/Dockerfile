@@ -75,6 +75,6 @@ RUN uv run --no-project python -m pip install --break-system-packages cupy-cuda1
 # install QuEST
 RUN git clone https://github.com/rrmeister/pyquest -b develop --depth=1 --recursive /tmp/pyquest
 RUN cd /tmp/pyquest && \
-    sed -i -e "s/'gpu_accelerated': False,/'gpu_accelerated': True,/" -e "s/'gpu_compute_capability': None,/'gpu_compute_capability': 80,/" setup.py && \
-    pip install .
+    sed -i -e "s/'multithreaded': True,/'multithreaded': False,/" -e "s/'gpu_accelerated': False,/'gpu_accelerated': True,/" -e "s/'gpu_compute_capability': None,/'gpu_compute_capability': 80,/" setup.py && \
+    uv run --no-project python -m pip install --break-system-packages .
     

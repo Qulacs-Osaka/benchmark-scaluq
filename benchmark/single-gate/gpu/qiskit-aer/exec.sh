@@ -1,1 +1,1 @@
-gv run python -m pytest run.py --benchmark-json="run.json" --benchmark-min-rounds=1 --benchmark-warmup=on
+uv run python -m pytest run.py --benchmark-json="run.json" --benchmark-min-rounds=1 --benchmark-warmup=on
