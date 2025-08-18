@@ -38,12 +38,13 @@ double_gates = [
     ("2 qubits dense", dense2)
 ]
 
-nqubits_list = range(4, 27)
+nqubits_list = range(4, 26)
 
-
-def benchfunc(qc):
+def transpile_on_gpu(qc):
     backend = AerSimulator(method="statevector", device="GPU", cuStateVec_enable=True)
-    qc = transpile(qc, backend)
+    return backend, transpile(qc, backend)
+
+def benchfunc(backend, qc):
     backend.run(qc, shots=1).result()
 
 def create_params(gates: list[tuple[str, Callable[..., QuantumCircuit]]]):
@@ -55,8 +56,10 @@ def test_Single(benchmark, name, factory, nqubits):
     benchmark.group = name
     qc = QuantumCircuit(nqubits)
     qc.initialize(random_statevector(2**nqubits), list(range(nqubits)))
-    factory(random.randint(0, nqubits - 1), qc)
-    benchmark(benchfunc, qc)
+    for _ in range(nqubits-1):
+        for i in range(nqubits):
+            factory(i, qc)
+    benchmark(benchfunc, *transpile_on_gpu(qc))
 
 single_angle_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(single_angle_gates, nqubits_list))
 @pytest.mark.parametrize(["name", "factory", "nqubits"], single_angle_params)
@@ -64,8 +67,10 @@ def test_SingleAngle(benchmark, name, factory, nqubits):
     benchmark.group = name
     qc = QuantumCircuit(nqubits)
     qc.initialize(random_statevector(2**nqubits), list(range(nqubits)))
-    factory(random.randint(0, nqubits - 1), random.random() * math.pi * 2, qc)
-    benchmark(benchfunc, qc)
+    for _ in range(nqubits-1):
+        for i in range(nqubits):
+            factory(i, random.random() * math.pi * 2, qc)
+    benchmark(benchfunc, *transpile_on_gpu(qc))
 
 double_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(double_gates, nqubits_list))
 @pytest.mark.parametrize(["name", "factory", "nqubits"], double_params)
@@ -73,9 +78,9 @@ def test_Double(benchmark, name, factory, nqubits):
     benchmark.group = name
     qc = QuantumCircuit(nqubits)
     qc.initialize(random_statevector(2**nqubits), list(range(nqubits)))
-    t1 = random.randint(0, nqubits - 1)
-    t2 = random.randint(0, nqubits - 2)
-    if(t2 == t1):
-        t2 = nqubits - 1
-    factory(t1, t2, qc)
-    benchmark(benchfunc, qc)
+    for t1 in range(nqubits):
+        for t2 in range(nqubits):
+            if t1 == t2:
+                continue
+            factory(t1, t2, qc)
+    benchmark(benchfunc, *transpile_on_gpu(qc))

@@ -60,7 +60,7 @@ handle = custatevec.create()
 atexit.register(lambda: custatevec.destroy(handle))
 
 def benchfunc(nqubits, state, gate, targets, controls=[]):
-    custatevec.apply_matrix(handle, state, dtype, nqubits, gate, dtype, custatevec.MatrixLayout.ROW, 0, targets, len(targets), controls, [1], len(controls), computeType, None, 0)
+    custatevec.apply_matrix(handle, state, dtype, nqubits, gate, dtype, custatevec.MatrixLayout.ROW, 0, targets, len(targets), controls, [1], len(controls), compute_type, None, 0)
 
 def create_params(gates: list[tuple[str, Callable[..., list[list[int]]]]]):
     return map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(gates, nqubits_list))
