@@ -43,10 +43,10 @@ def controlled(mat):
     return ret
 
 double_gates = [
-    ("CX", lambda: controlled(mgate.X(0).get_matrix())),
-    ("CZ", lambda: controlled(mgate.Z(0).get_matrix())),
+    ("CX", lambda: mgate.X(0).get_matrix()),
+    ("CZ", lambda: mgate.Z(0).get_matrix()),
     ("SWAP", lambda: [[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]]),
-    ("CH", lambda: controlled(mgate.H(0).get_matrix())),
+    ("CH", lambda: mgate.H(0).get_matrix()),
     ("2 qubits dense", dense2)
 ]
 
@@ -54,13 +54,27 @@ def random_state(nqubits):
     vec = scaluq.StateVector.Haar_random_state(nqubits).get_vector()
     return cp.array(vec, dtype=dtype)
 
-nqubits_list = range(4, 20)
+nqubits_list = range(4, 26)
 
 handle = custatevec.create()
 atexit.register(lambda: custatevec.destroy(handle))
 
-def benchfunc(nqubits, state, gate, targets, controls=[]):
-    custatevec.apply_matrix(handle, state, dtype, nqubits, gate, dtype, custatevec.MatrixLayout.ROW, 0, targets, len(targets), controls, [1], len(controls), compute_type, None, 0)
+def benchfunc_t1(nqubits, state, gate, exptr, exsz):
+    for _ in range(nqubits-1):
+        for i in range(nqubits):
+            custatevec.apply_matrix(handle, state, dtype, nqubits, gate, dtype, custatevec.MatrixLayout.ROW, 0, [i], 1, [], [], 0, compute_type, exptr, exsz)
+
+def benchfunc_t2(nqubits, state, gate, exptr, exsz):
+    for t1 in range(nqubits):
+        for t2 in range(nqubits):
+            if t1 == t2: continue
+            custatevec.apply_matrix(handle, state, dtype, nqubits, gate, dtype, custatevec.MatrixLayout.ROW, 0, [t1, t2], 2, [], [], 0, compute_type, exptr, exsz)
+
+def benchfunc_t1c1(nqubits, state, gate, exptr, exsz):
+    for t in range(nqubits):
+        for c in range(nqubits):
+            if t == c: continue
+            custatevec.apply_matrix(handle, state, dtype, nqubits, gate, dtype, custatevec.MatrixLayout.ROW, 0, [t], 1, [c], [1], 1, compute_type, exptr, exsz)
 
 def create_params(gates: list[tuple[str, Callable[..., list[list[int]]]]]):
     return map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(gates, nqubits_list))
@@ -69,20 +83,45 @@ single_params = create_params(single_gates)
 @pytest.mark.parametrize(["name", "factory", "nqubits"], single_params)
 def test_Single(benchmark, name, factory, nqubits):
     benchmark.group = name
-    benchmark(benchfunc, nqubits, random_state(nqubits), cp.array(factory(), dtype=dtype), [random.randint(0, nqubits - 1)])
+    state = random_state(nqubits)
+    gate = cp.array(factory(), dtype=dtype)
+    extra = custatevec.apply_matrix_get_workspace_size(handle, dtype, nqubits, gate.data, dtype, custatevec.MatrixLayout.ROW, 0, 1, 0, compute_type)
+    if extra > 0:
+        sp = cp.array([0]*extra, dtype=cp.uint8)
+        benchmark(benchfunc_t1, nqubits, state.data, gate, sp.data, extra)
+    else:
+        benchmark(benchfunc_t1, nqubits, state.data, gate, 0, extra)
 
 single_angle_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(single_angle_gates, nqubits_list))
 @pytest.mark.parametrize(["name", "factory", "nqubits"], single_angle_params)
 def test_SingleAngle(benchmark, name, factory, nqubits):
     benchmark.group = name
-    benchmark(benchfunc, nqubits, random_state(nqubits), cp.array(factory(random.random(), math.pi * 2), dtype=dtype), [random.randint(0, nqubits - 1)])
+    state = random_state(nqubits)
+    gate = cp.array(factory(random.random() * math.pi * 2), dtype=dtype)
+    extra = custatevec.apply_matrix_get_workspace_size(handle, dtype, nqubits, gate.data, dtype, custatevec.MatrixLayout.ROW, 0, 1, 0, compute_type)
+    if extra > 0:
+        sp = cp.array([0]*extra, dtype=cp.uint8)
+        benchmark(benchfunc_t1, nqubits, state.data, gate, sp.data, extra)
+    else:
+        benchmark(benchfunc_t1, nqubits, state.data, gate, 0, extra)
 
 double_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(double_gates, nqubits_list))
 @pytest.mark.parametrize(["name", "factory", "nqubits"], double_params)
 def test_Double(benchmark, name, factory, nqubits):
     benchmark.group = name
-    t1 = random.randint(0, nqubits - 1)
-    t2 = random.randint(0, nqubits - 2)
-    if(t2 == t1):
-        t2 = nqubits - 1
-    benchmark(benchfunc, nqubits, random_state(nqubits), cp.array(factory(), dtype=dtype), [t1, t2])
+    state = random_state(nqubits)
+    gate = cp.array(factory(), dtype=dtype)
+    if name in ["CX", "CZ", "CH"]:
+        extra = custatevec.apply_matrix_get_workspace_size(handle, dtype, nqubits, gate.data, dtype, custatevec.MatrixLayout.ROW, 0, 1, 1, compute_type)
+        if extra > 0:
+            sp = cp.array([0]*extra, dtype=cp.uint8)
+            benchmark(benchfunc_t1c1, nqubits, state.data, gate, sp.data, extra)
+        else:
+            benchmark(benchfunc_t1c1, nqubits, state.data, gate, 0, extra)
+    else:
+        extra = custatevec.apply_matrix_get_workspace_size(handle, dtype, nqubits, gate.data, dtype, custatevec.MatrixLayout.ROW, 0, 2, 0, compute_type)
+        if extra > 0:
+            sp = cp.array([0]*extra, dtype=cp.uint8)
+            benchmark(benchfunc_t2, nqubits, state.data, gate, sp.data, extra)
+        else:
+            benchmark(benchfunc_t2, nqubits, state.data, gate, 0, extra)
