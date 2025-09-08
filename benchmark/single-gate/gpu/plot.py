@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import os
 
-libs = ["scaluq", "qulacs", "qiskit-aer", "qiskit-aer-custatevec"]
-libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Qiskit-Aer (cuStateVec)"]
+libs = ["scaluq", "qulacs", "qiskit-aer", "qiskit-aer-custatevec", "custatevec"]
+libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Qiskit-Aer (cuStateVec)", "cuStateVec"]
 
 def load():
     filepaths = []
@@ -30,7 +30,7 @@ def load():
             group = item["group"]
             nqubits = int(item["params"]["nqubits"])
             stats = item["stats"]
-            dat[group][name][nqubits] = float(stats["min"])
+            dat[group][name][nqubits] = float(stats["min"]) / (nqubits * (nqubits - 1))
 
     return dat
 
