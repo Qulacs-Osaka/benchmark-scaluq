@@ -47,7 +47,7 @@ nqubits_list = range(4, 28)
 
 def benchfunc(circuit, state):
     circuit.update_quantum_state(state)
-    cp.cuda.runtime.deviceSynchronize()
+    #cp.cuda.runtime.deviceSynchronize()
 
 def create_params(gates: list[tuple[str, Callable[..., qulacs.QuantumGateBase]]]):
     return map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(gates, nqubits_list))
