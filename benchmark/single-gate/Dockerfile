@@ -66,7 +66,7 @@ RUN apt-get install -y \
     cmake \
     ninja-build
 RUN cd /tmp/scaluq && \
-    SCALUQ_USE_CUDA=OFF SCALUQ_USE_TEST=OFF SCALUQ_USE_EXE=OFF SCALUQ_FLOAT16=ON SCALUQ_BFLOAT16=ON uv run --no-project python -m pip install --break-system-packages .
+    SCALUQ_USE_CUDA=ON  SCALUQ_CUDA_ARCH=AMPERE80 SCALUQ_USE_TEST=OFF SCALUQ_USE_EXE=OFF SCALUQ_FLOAT16=ON SCALUQ_BFLOAT16=ON uv run --no-project python -m pip install --break-system-packages .
 RUN rm -r /tmp/scaluq
 
 # install custatevec

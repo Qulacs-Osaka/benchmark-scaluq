@@ -8,11 +8,13 @@ import math
 from typing import Callable
 import numpy as np
 import cupy as cp
+import cuquantum
 import cuquantum.bindings.custatevec as custatevec
 import sys
 import atexit
 
 dtype = cp.complex128
+dtype_cuquantum = cuquantum.cudaDataType.CUDA_C_64F
 compute_type = custatevec.ComputeType.COMPUTE_64F
 
 single_gates = [
@@ -51,7 +53,7 @@ double_gates = [
 ]
 
 def random_state(nqubits):
-    vec = scaluq.StateVector.Haar_random_state(nqubits).get_vector()
+    vec = scaluq.StateVector.Haar_random_state(nqubits).get_amplitudes()
     return cp.array(vec, dtype=dtype)
 
 nqubits_list = range(4, 26)
@@ -62,19 +64,19 @@ atexit.register(lambda: custatevec.destroy(handle))
 def benchfunc_t1(nqubits, state, gate, exptr, exsz):
     for _ in range(nqubits-1):
         for i in range(nqubits):
-            custatevec.apply_matrix(handle, state, dtype, nqubits, gate, dtype, custatevec.MatrixLayout.ROW, 0, [i], 1, [], [], 0, compute_type, exptr, exsz)
+            custatevec.apply_matrix(handle, state, dtype_cuquantum, nqubits, gate, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, [i], 1, [], [], 0, compute_type, exptr, exsz)
 
 def benchfunc_t2(nqubits, state, gate, exptr, exsz):
     for t1 in range(nqubits):
         for t2 in range(nqubits):
             if t1 == t2: continue
-            custatevec.apply_matrix(handle, state, dtype, nqubits, gate, dtype, custatevec.MatrixLayout.ROW, 0, [t1, t2], 2, [], [], 0, compute_type, exptr, exsz)
+            custatevec.apply_matrix(handle, state, dtype_cuquantum, nqubits, gate, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, [t1, t2], 2, [], [], 0, compute_type, exptr, exsz)
 
 def benchfunc_t1c1(nqubits, state, gate, exptr, exsz):
     for t in range(nqubits):
         for c in range(nqubits):
             if t == c: continue
-            custatevec.apply_matrix(handle, state, dtype, nqubits, gate, dtype, custatevec.MatrixLayout.ROW, 0, [t], 1, [c], [1], 1, compute_type, exptr, exsz)
+            custatevec.apply_matrix(handle, state, dtype_cuquantum, nqubits, gate, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, [t], 1, [c], [1], 1, compute_type, exptr, exsz)
 
 def create_params(gates: list[tuple[str, Callable[..., list[list[int]]]]]):
     return map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(gates, nqubits_list))
@@ -84,44 +86,47 @@ single_params = create_params(single_gates)
 def test_Single(benchmark, name, factory, nqubits):
     benchmark.group = name
     state = random_state(nqubits)
-    gate = cp.array(factory(), dtype=dtype)
-    extra = custatevec.apply_matrix_get_workspace_size(handle, dtype, nqubits, gate.data, dtype, custatevec.MatrixLayout.ROW, 0, 1, 0, compute_type)
+    gate_lst = [x for row in factory() for x in row]
+    gate = cp.array(gate_lst, dtype=dtype)
+    extra = custatevec.apply_matrix_get_workspace_size(handle, dtype_cuquantum, nqubits, gate.data.ptr, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, 1, 0, compute_type)
     if extra > 0:
         sp = cp.array([0]*extra, dtype=cp.uint8)
-        benchmark(benchfunc_t1, nqubits, state.data, gate, sp.data, extra)
+        benchmark(benchfunc_t1, nqubits, state.data.ptr, gate.data.ptr, sp.data.ptr, extra)
     else:
-        benchmark(benchfunc_t1, nqubits, state.data, gate, 0, extra)
+        benchmark(benchfunc_t1, nqubits, state.data.ptr, gate.data.ptr, 0, extra)
 
 single_angle_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(single_angle_gates, nqubits_list))
 @pytest.mark.parametrize(["name", "factory", "nqubits"], single_angle_params)
 def test_SingleAngle(benchmark, name, factory, nqubits):
     benchmark.group = name
     state = random_state(nqubits)
-    gate = cp.array(factory(random.random() * math.pi * 2), dtype=dtype)
-    extra = custatevec.apply_matrix_get_workspace_size(handle, dtype, nqubits, gate.data, dtype, custatevec.MatrixLayout.ROW, 0, 1, 0, compute_type)
+    gate_lst = [x for row in factory(random.random() * math.pi * 2) for x in row]
+    gate = cp.array(gate_lst, dtype=dtype)
+    extra = custatevec.apply_matrix_get_workspace_size(handle, dtype_cuquantum, nqubits, gate.data.ptr, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, 1, 0, compute_type)
     if extra > 0:
         sp = cp.array([0]*extra, dtype=cp.uint8)
-        benchmark(benchfunc_t1, nqubits, state.data, gate, sp.data, extra)
+        benchmark(benchfunc_t1, nqubits, state.data.ptr, gate.data.ptr, sp.data.ptr, extra)
     else:
-        benchmark(benchfunc_t1, nqubits, state.data, gate, 0, extra)
+        benchmark(benchfunc_t1, nqubits, state.data.ptr, gate.data.ptr, 0, extra)
 
 double_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(double_gates, nqubits_list))
 @pytest.mark.parametrize(["name", "factory", "nqubits"], double_params)
 def test_Double(benchmark, name, factory, nqubits):
     benchmark.group = name
     state = random_state(nqubits)
-    gate = cp.array(factory(), dtype=dtype)
+    gate_lst = [x for row in factory() for x in row]
+    gate = cp.array(gate_lst, dtype=dtype)
     if name in ["CX", "CZ", "CH"]:
-        extra = custatevec.apply_matrix_get_workspace_size(handle, dtype, nqubits, gate.data, dtype, custatevec.MatrixLayout.ROW, 0, 1, 1, compute_type)
+        extra = custatevec.apply_matrix_get_workspace_size(handle, dtype_cuquantum, nqubits, gate.data.ptr, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, 1, 1, compute_type)
         if extra > 0:
             sp = cp.array([0]*extra, dtype=cp.uint8)
-            benchmark(benchfunc_t1c1, nqubits, state.data, gate, sp.data, extra)
+            benchmark(benchfunc_t1c1, nqubits, state.data.ptr, gate.data.ptr, sp.data.ptr, extra)
         else:
-            benchmark(benchfunc_t1c1, nqubits, state.data, gate, 0, extra)
+            benchmark(benchfunc_t1c1, nqubits, state.data.ptr, gate.data.ptr, 0, extra)
     else:
-        extra = custatevec.apply_matrix_get_workspace_size(handle, dtype, nqubits, gate.data, dtype, custatevec.MatrixLayout.ROW, 0, 2, 0, compute_type)
+        extra = custatevec.apply_matrix_get_workspace_size(handle, dtype_cuquantum, nqubits, gate.data.ptr, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, 2, 0, compute_type)
         if extra > 0:
             sp = cp.array([0]*extra, dtype=cp.uint8)
-            benchmark(benchfunc_t2, nqubits, state.data, gate, sp.data, extra)
+            benchmark(benchfunc_t2, nqubits, state.data.ptr, gate.data.ptr, sp.data.ptr, extra)
         else:
-            benchmark(benchfunc_t2, nqubits, state.data, gate, 0, extra)
+            benchmark(benchfunc_t2, nqubits, state.data.ptr, gate.data.ptr, 0, extra)
