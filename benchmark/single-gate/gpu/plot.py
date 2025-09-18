@@ -42,11 +42,20 @@ def plot(dat, group):
     for name in dat_group:
         xs = list(sorted(dat_group[name].keys()))
         ys = [dat_group[name][x] for x in xs]
+        linestyle = 'solid'
         if name.count('('):
             cid = libnames.index(name[:name.index(' ')])
+            if name.count('(f64)'):
+                linestyle = 'solid'
+            if name.count('(f32)'):
+                linestyle = 'dashed'
+            if name.count('(f16)'):
+                linestyle = 'dashdot'
+            if name.count('(bf16)'):
+                linestyle = 'solid'
         else:
             cid = libnames.index(name)
-        plt.plot(xs, ys, label=name, c=cmap(cid))
+        plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle)
 
     plt.title(f"{group}")
     plt.yscale("log")
@@ -64,6 +73,8 @@ if __name__ == "__main__":
     dat = load()
 
     for group in dat.keys():
+        if group != 'CX':
+            continue
         plt.figure(figsize=(12, 6))
         plot(dat, group)
         plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1.0))
