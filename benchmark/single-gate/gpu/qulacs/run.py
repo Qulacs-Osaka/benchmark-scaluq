@@ -61,7 +61,7 @@ def test_Single(benchmark, name, factory, nqubits):
     for _ in range(nqubits-1):
         for i in range(nqubits):
             circuit.add_gate(factory(i))
-    state = qulacs.StateVector(nqubits)
+    state = qulacs.StateVectorGpu(nqubits)
     state.set_Haar_random_state()
     benchmark(benchfunc, circuit, state)
 
@@ -73,7 +73,7 @@ def test_SingleAngle(benchmark, name, factory, nqubits):
     for _ in range(nqubits-1):
         for i in range(nqubits):
             circuit.add_gate(factory(i, random.random() * math.pi * 2))
-    state = qulacs.StateVector(nqubits)
+    state = qulacs.StateVectorGpu(nqubits)
     state.set_Haar_random_state()
     benchmark(benchfunc, circuit, state)
 '''
@@ -87,6 +87,6 @@ def test_Double(benchmark, name, factory, nqubits):
         for t2 in range(nqubits):
             if t1 == t2: continue
             circuit.add_gate(factory(t1, t2))
-    state = qulacs.StateVector(nqubits)
+    state = qulacs.StateVectorGpu(nqubits)
     state.set_Haar_random_state(nqubits)
     benchmark(benchfunc, circuit, state)

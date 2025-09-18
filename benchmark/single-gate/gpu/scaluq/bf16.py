@@ -33,10 +33,10 @@ def dense2(t1, t2):
 
 double_gates = [
     ("CX", mgate.CX),
-    ("CZ", mgate.CZ),
-    ("SWAP", mgate.Swap),
-    ("CH", CH),
-    ("2 qubits dense", dense2)
+    #("CZ", mgate.CZ),
+    #("SWAP", mgate.Swap),
+    #("CH", CH),
+    #("2 qubits dense", dense2)
 ]
 
 nqubits_list = range(4, 28)
@@ -49,6 +49,7 @@ def benchfunc(circuit, state):
 def create_params(gates: list[tuple[str, Callable[..., scaluq.Gate]]]):
     return map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(gates, nqubits_list))
 
+'''
 single_params = create_params(single_gates)
 @pytest.mark.parametrize(["name", "factory", "nqubits"], single_params)
 def test_Single(benchmark, name, factory, nqubits):
@@ -70,6 +71,7 @@ def test_SingleAngle(benchmark, name, factory, nqubits):
             circuit.add_gate(factory(i, random.random() * math.pi * 2))
     state = scaluq.StateVector.Haar_random_state(nqubits)
     benchmark(benchfunc, circuit, state)
+'''
 
 double_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(double_gates, nqubits_list))
 @pytest.mark.parametrize(["name", "factory", "nqubits"], double_params)
