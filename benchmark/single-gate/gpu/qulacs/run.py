@@ -6,6 +6,7 @@ import math
 from typing import Callable
 import qulacs
 import qulacs.gate as mgate
+import cupy as cp
 
 single_gates = [
     ("X", mgate.X),
@@ -24,9 +25,10 @@ single_angle_gates = [
 ]
 
 def CH(c, t):
-    ret = mgate.to_matrix_gate(mgate.H(t))
-    ret.add_control_qubit(c, 1)
-    return ret
+    h = mgate.H(t)
+    g = mgate.to_matrix_gate(h)
+    g.add_control_qubit(c, 0)
+    return g
 
 def dense2(t1, t2):
     mat = unitary_group.rvs(4)
@@ -34,48 +36,57 @@ def dense2(t1, t2):
 
 double_gates = [
     ("CX", mgate.CNOT),
-    ("CZ", mgate.CZ),
-    ("SWAP", mgate.SWAP),
-    ("CH", CH),
-    ("2 qubits dense", dense2)
+    #("CZ", mgate.CZ),
+    #("SWAP", mgate.SWAP),
+    #("CH", CH),
+    #("2 qubits dense", dense2)
 ]
 
-nqubits_list = range(4, 27)
+nqubits_list = range(4, 28)
 
 
-def benchfunc(gate, state):
-    gate.update_quantum_state(state)
+def benchfunc(circuit, state):
+    circuit.update_quantum_state(state)
+    cp.cuda.runtime.deviceSynchronize()
 
 def create_params(gates: list[tuple[str, Callable[..., qulacs.QuantumGateBase]]]):
     return map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(gates, nqubits_list))
 
+'''
 single_params = create_params(single_gates)
 @pytest.mark.parametrize(["name", "factory", "nqubits"], single_params)
 def test_Single(benchmark, name, factory, nqubits):
     benchmark.group = name
-    gate = factory(random.randint(0, nqubits - 1))
-    state = qulacs.StateVectorGpu(nqubits)
+    circuit = qulacs.QuantumCircuit(nqubits)
+    for _ in range(nqubits-1):
+        for i in range(nqubits):
+            circuit.add_gate(factory(i))
+    state = qulacs.StateVector(nqubits)
     state.set_Haar_random_state()
-    benchmark(benchfunc, gate, state)
+    benchmark(benchfunc, circuit, state)
 
 single_angle_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(single_angle_gates, nqubits_list))
 @pytest.mark.parametrize(["name", "factory", "nqubits"], single_angle_params)
 def test_SingleAngle(benchmark, name, factory, nqubits):
     benchmark.group = name
-    gate = factory(random.randint(0, nqubits - 1), random.random() * math.pi * 2)
-    state = qulacs.StateVectorGpu(nqubits)
+    circuit = qulacs.QuantumCircuit(nqubits)
+    for _ in range(nqubits-1):
+        for i in range(nqubits):
+            circuit.add_gate(factory(i, random.random() * math.pi * 2))
+    state = qulacs.StateVector(nqubits)
     state.set_Haar_random_state()
-    benchmark(benchfunc, gate, state)
+    benchmark(benchfunc, circuit, state)
+'''
 
 double_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(double_gates, nqubits_list))
 @pytest.mark.parametrize(["name", "factory", "nqubits"], double_params)
 def test_Double(benchmark, name, factory, nqubits):
     benchmark.group = name
-    t1 = random.randint(0, nqubits - 1)
-    t2 = random.randint(0, nqubits - 2)
-    if(t2 == t1):
-        t2 = nqubits - 1
-    gate = factory(t1, t2)
-    state = qulacs.StateVectorGpu(nqubits)
-    state.set_Haar_random_state()
-    benchmark(benchfunc, gate, state)
+    circuit = qulacs.QuantumCircuit(nqubits)
+    for t1 in range(nqubits):
+        for t2 in range(nqubits):
+            if t1 == t2: continue
+            circuit.add_gate(factory(t1, t2))
+    state = qulacs.StateVector(nqubits)
+    state.set_Haar_random_state(nqubits)
+    benchmark(benchfunc, circuit, state)
