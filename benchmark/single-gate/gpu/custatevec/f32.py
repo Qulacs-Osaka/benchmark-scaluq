@@ -13,9 +13,9 @@ import cuquantum.bindings.custatevec as custatevec
 import sys
 import atexit
 
-dtype = cp.complex128
-dtype_cuquantum = cuquantum.cudaDataType.CUDA_C_64F
-compute_type = custatevec.ComputeType.COMPUTE_64F
+dtype = cp.complex64
+dtype_cuquantum = cuquantum.cudaDataType.CUDA_C_32F
+compute_type = custatevec.ComputeType.COMPUTE_32F
 
 single_gates = [
     ("X", lambda: mgate.X(0).get_matrix()),

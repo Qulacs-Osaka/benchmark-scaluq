@@ -15,7 +15,7 @@ def load():
         flist = glob.glob(path)
         for filepath in flist:
             libname = libnames[libidx]
-            if lib == "scaluq":
+            if lib == "scaluq" or lib == 'custatevec':
                 prec = os.path.basename(filepath)[:-5]
                 filepaths.append((f'{libname} ({prec})', filepath))
             else:
@@ -52,7 +52,9 @@ def plot(dat, group):
             if name.count('(f16)'):
                 linestyle = 'dashdot'
             if name.count('(bf16)'):
-                linestyle = 'solid'
+                linestyle = 'dotted'
+            if name.count('(cuStateVec)'):
+                linestyle = 'dashed'
         else:
             cid = libnames.index(name)
         plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle)
