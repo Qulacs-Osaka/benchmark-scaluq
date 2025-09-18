@@ -9,6 +9,7 @@ from qiskit.quantum_info import random_statevector
 from qiskit.circuit.library import UnitaryGate
 from qiskit_aer import AerSimulator
 from qiskit.compiler import transpile
+import cupy as cp
 
 single_gates = [
     ("X", lambda target, qc: qc.x(target)),
@@ -32,10 +33,10 @@ def dense2(t1, t2, qc):
 
 double_gates = [
     ("CX", lambda control, target, qc: qc.cx(control, target)),
-    ("CZ", lambda control, target, qc: qc.cz(control, target)),
-    ("SWAP", lambda control, target, qc: qc.swap(control, target)),
-    ("CH", lambda control, target, qc: qc.ch(control, target)),
-    ("2 qubits dense", dense2)
+    #("CZ", lambda control, target, qc: qc.cz(control, target)),
+    #("SWAP", lambda control, target, qc: qc.swap(control, target)),
+    #("CH", lambda control, target, qc: qc.ch(control, target)),
+    #("2 qubits dense", dense2)
 ]
 
 nqubits_list = range(4, 26)
@@ -45,11 +46,12 @@ def transpile_on_gpu(qc):
     return backend, transpile(qc, backend)
 
 def benchfunc(backend, qc):
-    backend.run(qc, shots=1).result()
+    backend.run(qc).wait_for_final_state(wait = 0.01)
 
 def create_params(gates: list[tuple[str, Callable[..., QuantumCircuit]]]):
     return map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(gates, nqubits_list))
 
+'''
 single_params = create_params(single_gates)
 @pytest.mark.parametrize(["name", "factory", "nqubits"], single_params)
 def test_Single(benchmark, name, factory, nqubits):
@@ -71,6 +73,7 @@ def test_SingleAngle(benchmark, name, factory, nqubits):
         for i in range(nqubits):
             factory(i, random.random() * math.pi * 2, qc)
     benchmark(benchfunc, *transpile_on_gpu(qc))
+'''
 
 double_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(double_gates, nqubits_list))
 @pytest.mark.parametrize(["name", "factory", "nqubits"], double_params)
