@@ -46,7 +46,8 @@ def transpile_on_gpu(qc):
     return backend, transpile(qc, backend)
 
 def benchfunc(backend, qc):
-    backend.run(qc).wait_for_final_state(wait = 0.001)
+    backend.run(qc, shots=1).result()
+    #cp.cuda.runtime.deviceSynchronize()
 
 def create_params(gates: list[tuple[str, Callable[..., QuantumCircuit]]]):
     return map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(gates, nqubits_list))
