@@ -32,14 +32,14 @@ def load():
             group = item["group"]
             nqubits = int(item["params"]["nqubits"])
             stats = item["stats"]
-            dat1[group][name][nqubits] = stats["min"]
+            dat1[group][name][nqubits] = stats["mean"]
         data = json.load(open(filepath_empty))
         items = data["benchmarks"]
         for item in items:
             group = item["group"]
             nqubits = int(item["params"]["nqubits"])
             stats = item["stats"]
-            dat2[group][name][nqubits] = stats["min"]
+            dat2[group][name][nqubits] = stats["mean"]
     dat = defaultdict(lambda: defaultdict(dict))
     for group in dat1:
         for name in dat1[group]:
