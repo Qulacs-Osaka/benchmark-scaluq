@@ -15,22 +15,27 @@ def load():
         flist = glob.glob(path)
         for filepath in flist:
             libname = libnames[libidx]
+            basename = os.path.basename(filepath)
+            filepath_empty = f"./{lib}-empty/{basename}"
             if lib == "scaluq" or lib == 'custatevec':
-                prec = os.path.basename(filepath)[:-5]
-                filepaths.append((f'{libname} ({prec})', filepath))
+                prec = basename[:-5]
+                filepaths.append((f'{libname} ({prec})', filepath, filepath_empty))
             else:
-                filepaths.append((f'{libname}', filepath))
+                filepaths.append((f'{libname}', filepath, filepath_empty))
 
     dat = defaultdict(lambda: defaultdict(dict))
-    for name, filepath in filepaths:
+    for name, filepath, filepath_empty in filepaths:
         data = json.load(open(filepath))
+        data_empty = json.load(open(filepath_empty))
 
         items = data["benchmarks"]
-        for item in items:
+        items_empty = data_empty["benchmarks"]
+        for item, item_empty in zip(items, items_empty):
             group = item["group"]
             nqubits = int(item["params"]["nqubits"])
             stats = item["stats"]
-            dat[group][name][nqubits] = float(stats["min"]) / (nqubits * (nqubits - 1))
+            stats_empty = item_empty["stats"]
+            dat[group][name][nqubits] = float(stats["min"] - stats_empty["min"]) / (nqubits * (nqubits - 1))
 
     return dat
 

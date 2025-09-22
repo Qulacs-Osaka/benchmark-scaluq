@@ -47,28 +47,28 @@ RUN cd /tmp/qiskit-aer && \
 RUN uv run python -m pip uninstall --break-system-packages -y cmake
 RUN rm -r /tmp/qiskit-aer
 
-# # install qulacs
-# RUN git clone https://github.com/qulacs/qulacs --depth=1 /tmp/qulacs
-# RUN apt-get update
-# RUN apt-get install -y \
-#     build-essential \
-#     cmake \
-#     libboost-dev
-# RUN cd /tmp/qulacs && \
-#     USE_GPU=Yes uv run --no-project python -m pip install --break-system-packages .
-# RUN rm -r /tmp/qulacs
-# 
-# # install scaluq
-# RUN git clone https://github.com/qulacs/scaluq --depth=1 /tmp/scaluq
-# RUN apt-get update
-# RUN apt-get install -y \
-#     build-essential \
-#     cmake \
-#     ninja-build
-# RUN cd /tmp/scaluq && \
-#     SCALUQ_USE_CUDA=ON  SCALUQ_CUDA_ARCH=AMPERE80 SCALUQ_USE_TEST=OFF SCALUQ_USE_EXE=OFF SCALUQ_FLOAT16=ON SCALUQ_BFLOAT16=ON uv run --no-project python -m pip install --break-system-packages .
-# RUN rm -r /tmp/scaluq
-# 
+# install qulacs
+RUN git clone https://github.com/qulacs/qulacs --depth=1 /tmp/qulacs
+RUN apt-get update
+RUN apt-get install -y \
+    build-essential \
+    cmake \
+    libboost-dev
+RUN cd /tmp/qulacs && \
+    USE_GPU=Yes uv run --no-project python -m pip install --break-system-packages .
+RUN rm -r /tmp/qulacs
+
+# install scaluq
+RUN git clone https://github.com/qulacs/scaluq --depth=1 /tmp/scaluq
+RUN apt-get update
+RUN apt-get install -y \
+    build-essential \
+    cmake \
+    ninja-build
+RUN cd /tmp/scaluq && \
+    SCALUQ_USE_CUDA=ON  SCALUQ_CUDA_ARCH=AMPERE80 SCALUQ_USE_TEST=OFF SCALUQ_USE_EXE=OFF SCALUQ_FLOAT16=ON SCALUQ_BFLOAT16=ON uv run --no-project python -m pip install --break-system-packages .
+RUN rm -r /tmp/scaluq
+
 # install custatevec
 RUN uv run --no-project python -m pip install --break-system-packages cupy-cuda12x cuquantum-python-cu12 custatevec-cu12
 # 
@@ -80,3 +80,5 @@ RUN uv run --no-project python -m pip install --break-system-packages cupy-cuda1
 #     
 
 ENV LD_LIBRARY_PATH /opt/nvidia/cuquantum/lib/12:/opt/nvidia/cutensor/lib/12:$LD_LIBRARY_PATH
+
+RUN uv run python -m pip install --break-system-packages matplotlib
