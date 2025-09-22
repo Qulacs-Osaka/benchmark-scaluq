@@ -23,20 +23,28 @@ def load():
             else:
                 filepaths.append((f'{libname}', filepath, filepath_empty))
 
-    dat = defaultdict(lambda: defaultdict(dict))
+    dat1 = defaultdict(lambda: defaultdict(dict))
+    dat2 = defaultdict(lambda: defaultdict(dict))
     for name, filepath, filepath_empty in filepaths:
         data = json.load(open(filepath))
-        data_empty = json.load(open(filepath_empty))
-
         items = data["benchmarks"]
-        items_empty = data_empty["benchmarks"]
-        for item, item_empty in zip(items, items_empty):
+        for item in items:
             group = item["group"]
             nqubits = int(item["params"]["nqubits"])
             stats = item["stats"]
-            stats_empty = item_empty["stats"]
-            dat[group][name][nqubits] = float(stats["min"] - stats_empty["min"]) / (nqubits * (nqubits - 1))
-
+            dat1[group][name][nqubits] = stats["min"]
+        data = json.load(open(filepath_empty))
+        items = data["benchmarks"]
+        for item in items:
+            group = item["group"]
+            nqubits = int(item["params"]["nqubits"])
+            stats = item["stats"]
+            dat2[group][name][nqubits] = stats["min"]
+    dat = defaultdict(lambda: defaultdict(dict))
+    for group in dat1:
+        for name in dat1[group]:
+            for nqubits in dat1[group][name]:
+                dat[group][name][nqubits] = (dat1[group][name][nqubits] - dat2[group][name][nqubits]) / (nqubits * (nqubits - 1))
     return dat
 
 
