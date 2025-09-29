@@ -5,8 +5,8 @@ from scipy.stats import unitary_group
 import math
 from typing import Callable
 import scaluq as scaluqbase
-import scaluq.default.f64 as scaluq
-import scaluq.default.f64.gate as mgate
+import scaluq.default.f32 as scaluq
+import scaluq.default.f32.gate as mgate
 
 single_gates = [
     ("X", mgate.X),
