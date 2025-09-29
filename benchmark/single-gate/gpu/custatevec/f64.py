@@ -62,23 +62,26 @@ handle = custatevec.create()
 atexit.register(lambda: custatevec.destroy(handle))
 
 def benchfunc_t1(nqubits, state, gate, exptr, exsz):
-    for _ in range(nqubits-1):
-        for i in range(nqubits):
-            custatevec.apply_matrix(handle, state, dtype_cuquantum, nqubits, gate, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, [i], 1, [], [], 0, compute_type, exptr, exsz)
+    for __ in range(100):
+        for _ in range(nqubits-1):
+            for i in range(nqubits):
+                custatevec.apply_matrix(handle, state, dtype_cuquantum, nqubits, gate, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, [i], 1, [], [], 0, compute_type, exptr, exsz)
     cp.cuda.runtime.deviceSynchronize()
 
 def benchfunc_t2(nqubits, state, gate, exptr, exsz):
-    for t1 in range(nqubits):
-        for t2 in range(nqubits):
-            if t1 == t2: continue
-            custatevec.apply_matrix(handle, state, dtype_cuquantum, nqubits, gate, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, [t1, t2], 2, [], [], 0, compute_type, exptr, exsz)
+    for __ in range(100):
+        for t1 in range(nqubits):
+            for t2 in range(nqubits):
+                if t1 == t2: continue
+                custatevec.apply_matrix(handle, state, dtype_cuquantum, nqubits, gate, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, [t1, t2], 2, [], [], 0, compute_type, exptr, exsz)
     cp.cuda.runtime.deviceSynchronize()
 
 def benchfunc_t1c1(nqubits, state, gate, exptr, exsz):
-    for t in range(nqubits):
-        for c in range(nqubits):
-            if t == c: continue
-            custatevec.apply_matrix(handle, state, dtype_cuquantum, nqubits, gate, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, [t], 1, [c], [1], 1, compute_type, exptr, exsz)
+    for __ in range(100):
+        for t in range(nqubits):
+            for c in range(nqubits):
+                if t == c: continue
+                custatevec.apply_matrix(handle, state, dtype_cuquantum, nqubits, gate, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, [t], 1, [c], [1], 1, compute_type, exptr, exsz)
     cp.cuda.runtime.deviceSynchronize()
 
 def create_params(gates: list[tuple[str, Callable[..., list[list[int]]]]]):

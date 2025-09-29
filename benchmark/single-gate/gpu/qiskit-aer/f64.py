@@ -59,9 +59,10 @@ def test_Single(benchmark, name, factory, nqubits):
     benchmark.group = name
     qc = QuantumCircuit(nqubits)
     qc.initialize(random_statevector(2**nqubits), list(range(nqubits)))
-    for _ in range(nqubits-1):
-        for i in range(nqubits):
-            factory(i, qc)
+    for __ in range(100):
+        for _ in range(nqubits-1):
+            for i in range(nqubits):
+                factory(i, qc)
     qc.save_statevector()
     benchmark(benchfunc, *transpile_on_gpu(qc))
 
@@ -71,9 +72,10 @@ def test_SingleAngle(benchmark, name, factory, nqubits):
     benchmark.group = name
     qc = QuantumCircuit(nqubits)
     qc.initialize(random_statevector(2**nqubits), list(range(nqubits)))
-    for _ in range(nqubits-1):
-        for i in range(nqubits):
-            factory(i, random.random() * math.pi * 2, qc)
+    for __ in range(100):
+        for _ in range(nqubits-1):
+            for i in range(nqubits):
+                factory(i, random.random() * math.pi * 2, qc)
     qc.save_statevector()
     benchmark(benchfunc, *transpile_on_gpu(qc))
 '''
@@ -84,10 +86,11 @@ def test_Double(benchmark, name, factory, nqubits):
     benchmark.group = name
     qc = QuantumCircuit(nqubits)
     qc.initialize(random_statevector(2**nqubits), list(range(nqubits)))
-    for t1 in range(nqubits):
-        for t2 in range(nqubits):
-            if t1 == t2:
-                continue
-            factory(t1, t2, qc)
+    for __ in range(100):
+        for t1 in range(nqubits):
+            for t2 in range(nqubits):
+                if t1 == t2:
+                    continue
+                factory(t1, t2, qc)
     qc.save_statevector()
     benchmark(benchfunc, *transpile_on_gpu(qc))
