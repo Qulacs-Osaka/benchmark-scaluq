@@ -9,6 +9,9 @@
 #include <vector>
 #include <cmath>
 
+// TODO: 16 qubitでセグフォが出るので原因調査
+// どこかで2^n * 2^nの行列を作ってる？
+
 #define CUDA_CHECK(err)                                                                                                         \
     {                                                                                                                           \
         cudaError_t e = err;                                                                                                    \
