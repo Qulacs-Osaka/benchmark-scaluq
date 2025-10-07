@@ -11,4 +11,4 @@ if [ ! -d scaluq/ ]; then
 fi
 
 cmake -B build -G Ninja
-cmake --build build -j # Executable will be created at build/Scaluq
+cmake --build build -j 8 # Executable will be created at build/Scaluq
