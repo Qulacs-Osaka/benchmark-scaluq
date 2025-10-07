@@ -2,47 +2,89 @@
 #include <vector>
 #include "scaluq/all.hpp"
 
-template <scaluq::Precision Prec, scaluq::ExecutionSpace Space>
-void add_gates(scaluq::Circuit<Prec, Space> &circuit, const std::uint64_t seed)
+struct BenchmarkConfig
 {
+    std::uint64_t n_qubits = 5;
+    std::uint64_t n_batches = 5;
+    std::uint64_t n_layers = 5;
+    std::uint64_t n_iterations = 10;
+    std::uint64_t seed = 0;
+};
 
-    return;
+struct BenchmarkResult
+{
+    float initialization_ms;
+    float execution_ms;
+    float per_iteration_ms;
+};
+
+template <scaluq::Precision Prec, scaluq::ExecutionSpace Space>
+scaluq::Circuit<Prec, Space> create_benchmark_circuit(
+    std::uint64_t n_qubits,
+    std::uint64_t n_layers,
+    std::uint64_t seed)
+{
+    scaluq::Circuit<Prec, Space> circuit(n_qubits);
+    std::mt19937 rng(seed);
+    std::uniform_real_distribution<double> dist(0.0, 2.0 * M_PI);
+
+    for (std::uint64_t layer = 0; layer < n_layers; ++layer)
+    {
+        for (std::uint64_t i = 0; i < n_qubits; ++i)
+        {
+            circuit.add_gate(scaluq::gate::CX<Prec, Space>(i, (i + 1) % n_qubits));
+            circuit.add_gate(scaluq::gate::RX<Prec, Space>(i, dist(rng)));
+            circuit.add_gate(scaluq::gate::RZ<Prec, Space>(i, dist(rng)));
+        }
+    }
+    return circuit;
 }
 
 template <scaluq::Precision Prec, scaluq::ExecutionSpace Space>
-void run_bench(const std::uint64_t n_qubits, const std::uint64_t n_batches, const std::uint64_t n_layers, scaluq::StateVectorBatched<Prec, Space> &states)
+void run_benchmark(
+    const scaluq::Circuit<Prec, Space> &circuit,
+    scaluq::StateVectorBatched<Prec, Space> &states,
+    std::uint64_t n_iterations = 1)
 {
-    return;
+    for (std::uint64_t i = 0; i < n_iterations; ++i)
+    {
+        circuit.update_quantum_state(states);
+    }
+}
+
+template <scaluq::Precision Prec, scaluq::ExecutionSpace Space>
+auto initialize_benchmark(const BenchmarkConfig &config)
+{
+    scaluq::StateVectorBatched<Prec, Space> states(config.n_batches, config.n_qubits);
+    auto circuit = create_benchmark_circuit<Prec, Space>(config.n_qubits, config.n_layers, config.seed);
+    return std::make_tuple(states, circuit);
 }
 
 int main()
 {
     scaluq::initialize();
     {
-        auto start_init = std::chrono::steady_clock::now();
+        BenchmarkResult result{};
+        BenchmarkConfig config{};
 
         constexpr scaluq::Precision Prec = scaluq::Precision::F64;
         constexpr scaluq::ExecutionSpace Space = scaluq::ExecutionSpace::Default;
-        constexpr std::uint64_t n_qubits = 5;
-        constexpr std::uint64_t n_batches = 5;
-        constexpr std::uint64_t n_layers = 5;
-        constexpr std::uint64_t seed = 0;
 
-        scaluq::StateVectorBatched<Prec, Space> states(n_batches, n_qubits);
-        scaluq::Circuit<Prec, Space> circuit(n_qubits);
-
-        add_gates(circuit, seed);
-
+        auto start_init = std::chrono::steady_clock::now();
+        auto [states, circuit] = initialize_benchmark<Prec, Space>(config);
         auto end_init = std::chrono::steady_clock::now();
-        std::chrono::duration<float> diff_init = end_init - start_init;
-        std::cout << "initialize time: " << diff_init.count() << " [ms]" << std::endl;
+        result.initialization_ms = std::chrono::duration<float, std::milli>(end_init - start_init).count();
 
-        auto start_upd = std::chrono::steady_clock::now();
-        run_bench(n_qubits, n_batches, n_layers, states);
-        auto end_upd = std::chrono::steady_clock::now();
-        std::chrono::duration<float> diff_upd = end_upd - start_upd;
-        std::cout << "update time: " << diff_upd.count() << " [ms]" << std::endl;
-        std::cout << "total time: " << diff_init.count() + diff_upd.count() << " [ms]" << std::endl;
+        std::cout << "initialize time: " << result.initialization_ms << " [ms]" << std::endl;
+
+        auto start_exec = std::chrono::steady_clock::now();
+        run_benchmark(circuit, states, config.n_iterations);
+        auto end_exec = std::chrono::steady_clock::now();
+        result.execution_ms = std::chrono::duration<float, std::milli>(end_exec - start_exec).count();
+        result.per_iteration_ms = result.execution_ms / config.n_iterations;
+
+        std::cout << "update time: " << result.execution_ms << " [ms]" << std::endl;
+        std::cout << "total time: " << result.initialization_ms + result.execution_ms << " [ms]" << std::endl;
     }
     scaluq::finalize();
 }
