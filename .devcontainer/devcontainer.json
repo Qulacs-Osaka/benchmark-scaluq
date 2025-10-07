@@ -4,19 +4,23 @@
         "dockerfile": "../Dockerfile.batch",
         "context": ".."
     },
-    "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash",
-        "python.defaultInterpreterPath": "/usr/bin/python3"
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "python.defaultInterpreterPath": "/usr/bin/python3"
+            },
+            "extensions": [
+                "ms-python.python",
+                "ms-azuretools.vscode-docker",
+                "ms-vscode.cpptools"
+            ]
+        }
     },
-    "extensions": [
-        "ms-python.python",
-        "ms-azuretools.vscode-docker",
-        "ms-vscode.cpptools"
-    ],
     "runArgs": [
         "--gpus",
         "all"
     ],
-    "waitFor": "containerStarted",
-    "remoteUser": "root"
+    "remoteUser": "root",
+    "postCreateCommand": "wget -qO- https://starship.rs/install.sh | sh -s -- -y && echo 'eval \"$(starship init bash)\"' >> ~/.bashrc"
 }
