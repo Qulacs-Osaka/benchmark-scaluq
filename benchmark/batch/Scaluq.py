@@ -5,9 +5,6 @@ from scaluq.default.f64 import QuantumCircuit, BatchedStateVector
 from scaluq.default.f64.gate import CX, ParametricRX, ParametricRZ
 
 n_qubits = 5
-PARAMETRICX_NAME = "paramx"
-PARAMETRICZ_NAME = "paramz"
-
 
 # 論理的にはn_batch個の回路を使って状態ベクトルを更新する関数
 # 実際は1つの回路を用意して異なるパラメータでゲート列を実行
@@ -25,8 +22,8 @@ def create_circuit(
             circuit.add_gate(ParametricRZ(i))
             xs = rng.random(n_batch)
             zs = rng.random(n_batch)
-            xname = PARAMETRICX_NAME + "_" + str(cnt)
-            zname = PARAMETRICZ_NAME + "_" + str(cnt)
+            xname = "X" + "_" + str(cnt)
+            zname = "Z" + "_" + str(cnt)
             cnt += 1
             params[xname] = xs
             params[zname] = zs

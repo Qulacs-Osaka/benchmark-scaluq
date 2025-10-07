@@ -71,6 +71,27 @@
         "semaphore": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "__nullptr": "cpp"
+        "__nullptr": "cpp",
+        "any": "cpp",
+        "charconv": "cpp",
+        "complex": "cpp",
+        "forward_list": "cpp",
+        "set": "cpp",
+        "regex": "cpp",
+        "hash_map": "cpp",
+        "format": "cpp",
+        "future": "cpp",
+        "ranges": "cpp",
+        "span": "cpp",
+        "stdfloat": "cpp",
+        "valarray": "cpp",
+        "variant": "cpp"
+    },
+    "[cpp]": {
+        "editor.wordBasedSuggestions": "off",
+        "editor.semanticHighlighting.enabled": true,
+        "editor.stickyScroll.defaultModel": "foldingProviderModel",
+        "editor.suggest.insertMode": "replace",
+        "editor.formatOnSave": true
     }
 }

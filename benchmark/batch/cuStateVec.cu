@@ -19,7 +19,7 @@
         }                                                                                                                       \
     }
 
-// batch個のParametrixRXゲートを作る関数
+// batch個のRXゲートを作る関数
 // matricesはn_batches*4のサイズであることを要求
 void make_rx(cuDoubleComplex (*matrices)[4], std::vector<double> angles)
 {
@@ -33,7 +33,7 @@ void make_rx(cuDoubleComplex (*matrices)[4], std::vector<double> angles)
     }
 }
 
-// batch個のParametrixRZゲートを作る関数
+// batch個のRZゲートを作る関数
 void make_rz(cuDoubleComplex (*matrices)[4], std::vector<double> angles)
 {
     for (int i = 0; i < angles.size(); i++)

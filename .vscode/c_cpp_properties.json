@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/opt/cuquantum-linux-x86_64-24.08.0.5_cuda12-archive/include",
-                "/usr/local/cuda-12.4/targets/x86_64-linux/include"
+                "/usr/local/cuda-12.6/include",
+                "/workspaces/benchmark-scaluq/benchmark/batch"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

@@ -1,9 +1,9 @@
-FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
+FROM nvidia/cuda:12.6.3-devel-ubuntu24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
-    git cmake make wget tar
+    git make wget tar cmake ninja-build gcc python3 build-essential ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
 
@@ -11,5 +11,7 @@ RUN wget https://developer.download.nvidia.com/compute/cuquantum/redist/cuquantu
     tar -xvf cuquantum-linux-x86_64-24.08.0.5_cuda12-archive.tar.xz
 
 ENV CUQUANTUM_ROOT=/opt/cuquantum-linux-x86_64-24.08.0.5_cuda12-archive
+ENV CPATH="${CUQUANTUM_ROOT}/include:${CPATH}"
+ENV LD_LIBRARY_PATH="${CUQUANTUM_ROOT}/lib:${CUQUANTUM_ROOT}/lib64:${LD_LIBRARY_PATH}"
 
 WORKDIR /workspace
