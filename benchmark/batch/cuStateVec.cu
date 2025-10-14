@@ -59,25 +59,39 @@ void initialize_states(cuDoubleComplex *states, int n_qubits, int n_batches)
     }
 }
 
+__global__ void set_basis0_heads(cuDoubleComplex* states, size_t dim, int n_batches){
+  int b = blockIdx.x*blockDim.x + threadIdx.x;
+  if(b < n_batches){
+    states[static_cast<size_t>(b)*dim + 0] = make_cuDoubleComplex(1.0, 0.0);
+  }
+}
+
 int main()
 {
     auto start_init = std::chrono::steady_clock::now();
     // 各種パラメータ設定＋ベクトル・行列の初期化
-    const int n_qubits = 10;
+    const int n_qubits = 16;
     const int n_layers = 1;
     const int dim = (1 << n_qubits);
     const int n_targets = 1;
     const int n_controls = 1;
-    const int n_batches = 10;
+    const int n_batches = 1024;
     int target_index[1];
     int control_index[1];
     const int control_value[1] = {1};
 
-    cuDoubleComplex h_states[n_batches * dim];
-    initialize_states(h_states, n_qubits, n_batches);
+    // cuDoubleComplex h_states[n_batches * dim];
+    // initialize_states(h_states, n_qubits, n_batches);
     cuDoubleComplex *d_states;
     CUDA_CHECK(cudaMalloc((void **)&d_states, n_batches * dim * sizeof(cuDoubleComplex)));
-    CUDA_CHECK(cudaMemcpy(d_states, h_states, n_batches * dim * sizeof(cuDoubleComplex), cudaMemcpyHostToDevice));
+    // CUDA_CHECK(cudaMemcpy(d_states, h_states, n_batches * dim * sizeof(cuDoubleComplex), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemset(d_states, 0, (size_t)n_batches*dim*sizeof(cuDoubleComplex)));
+    {
+        int threads=256, blocks=(n_batches+threads-1)/threads;
+        set_basis0_heads<<<blocks, threads>>>(d_states, (size_t)dim, n_batches);
+        CUDA_CHECK(cudaGetLastError());
+        CUDA_CHECK(cudaDeviceSynchronize());
+    }
 
     static custatevecHandle_t handle;
     custatevecCreate(&handle);

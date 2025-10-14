@@ -4,8 +4,8 @@
 
 struct BenchmarkConfig
 {
-    std::uint64_t n_qubits = 10;
-    std::uint64_t n_batches = 10;
+    std::uint64_t n_qubits = 16;
+    std::uint64_t n_batches = 1024;
     std::uint64_t n_layers = 1;
     std::uint64_t n_iterations = 1;
     std::uint64_t seed = 0;
