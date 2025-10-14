@@ -9,9 +9,6 @@
 #include <vector>
 #include <cmath>
 
-// TODO: 16 qubitでセグフォが出るので原因調査
-// どこかで2^n * 2^nの行列を作ってる？
-
 #define CUDA_CHECK(err)                                                                                                         \
     {                                                                                                                           \
         cudaError_t e = err;                                                                                                    \
@@ -66,7 +63,7 @@ int main()
 {
     auto start_init = std::chrono::steady_clock::now();
     // 各種パラメータ設定＋ベクトル・行列の初期化
-    const int n_qubits = 3;
+    const int n_qubits = 10;
     const int n_layers = 1;
     const int dim = (1 << n_qubits);
     const int n_targets = 1;
@@ -91,9 +88,9 @@ int main()
         mat_indices[i] = i;
     cuDoubleComplex pxs[n_layers * n_qubits][n_batches][4];
     cuDoubleComplex pzs[n_layers * n_qubits][n_batches][4];
-    std::random_device(rd);
+    std::random_device rd;
     std::mt19937 mt(rd());
-    std::uniform_real_distribution distribution(0.0, 2.0 * M_PI);
+    std::uniform_real_distribution<double> distribution(0.0, 2.0 * M_PI);
     std::vector<double> angles1(n_batches), angles2(n_batches);
     for (int i = 0; i < n_layers * n_qubits; i++)
     {
@@ -106,21 +103,10 @@ int main()
         make_rz(pzs[i], angles2);
     }
 
-    auto end_init = std::chrono::steady_clock::now();
-    std::chrono::duration<float> diff_init = end_init - start_init;
-    std::cout << "initialize time: " << diff_init.count() << " [ms]" << std::endl;
-
     void *extra_workspace_cx = nullptr;
     void *extra_workspace_param = nullptr;
     size_t extra_workspace_size_in_bytes_cx = 0;
     size_t extra_workspace_size_in_bytes_param = 0;
-    cudaEvent_t start_upd, end_upd;
-    cudaEventCreate(&start_upd);
-    cudaEventCreate(&end_upd);
-
-    // start measuring update
-    cudaEventRecord(start_upd);
-
     // CX: check the size of external workspace
     custatevecApplyMatrixBatchedGetWorkspaceSize(
         handle,
@@ -162,6 +148,17 @@ int main()
         &extra_workspace_size_in_bytes_param);
     if (extra_workspace_size_in_bytes_param > 0)
         CUDA_CHECK(cudaMalloc(&extra_workspace_param, extra_workspace_size_in_bytes_param));
+
+    auto end_init = std::chrono::steady_clock::now();
+    std::chrono::duration<float> diff_init = end_init - start_init;
+    std::cout << "initialize time: " << diff_init.count() << " [ms]" << std::endl;
+
+    cudaEvent_t start_upd, end_upd;
+    cudaEventCreate(&start_upd);
+    cudaEventCreate(&end_upd);
+
+    // start measuring update
+    cudaEventRecord(start_upd);
 
     for (int layer = 0; layer < n_layers; layer++)
     {
@@ -246,6 +243,7 @@ int main()
 
     // end measuring update
     cudaEventRecord(end_upd);
+    CUDA_CHECK(cudaEventSynchronize(end_upd));
     float diff_upd = 0;
     cudaEventElapsedTime(&diff_upd, start_upd, end_upd);
     std::cout << "update time: " << diff_upd << " [ms]" << std::endl;
