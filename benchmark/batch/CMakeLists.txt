@@ -67,3 +67,4 @@ function(exe name)
 endfunction()
 
 exe(Scaluq)
+exe(test_scaluq)
