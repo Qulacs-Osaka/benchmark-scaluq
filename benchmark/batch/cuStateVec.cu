@@ -68,7 +68,14 @@ __global__ void set_basis0_heads(cuDoubleComplex* states, size_t dim, int n_batc
 
 int main()
 {
+    static custatevecHandle_t handle;
+    custatevecCreate(&handle);
+    cudaStream_t s;
+    CUDA_CHECK(cudaStreamCreateWithFlags(&s, cudaStreamNonBlocking));
+    custatevecSetStream(handle, s);
+
     auto start_init = std::chrono::steady_clock::now();
+
     // 各種パラメータ設定＋ベクトル・行列の初期化
     const int n_qubits = 16;
     const int n_layers = 1;
@@ -80,21 +87,15 @@ int main()
     int control_index[1];
     const int control_value[1] = {1};
 
-    // cuDoubleComplex h_states[n_batches * dim];
-    // initialize_states(h_states, n_qubits, n_batches);
+    // initialize states to |0>
     cuDoubleComplex *d_states;
-    CUDA_CHECK(cudaMalloc((void **)&d_states, n_batches * dim * sizeof(cuDoubleComplex)));
-    // CUDA_CHECK(cudaMemcpy(d_states, h_states, n_batches * dim * sizeof(cuDoubleComplex), cudaMemcpyHostToDevice));
-    CUDA_CHECK(cudaMemset(d_states, 0, (size_t)n_batches*dim*sizeof(cuDoubleComplex)));
+    CUDA_CHECK(cudaMallocAsync((void **)&d_states, n_batches * dim * sizeof(cuDoubleComplex), s));
+    CUDA_CHECK(cudaMemsetAsync(d_states, 0, (size_t)n_batches*dim*sizeof(cuDoubleComplex), s));
     {
-        int threads=256, blocks=(n_batches+threads-1)/threads;
-        set_basis0_heads<<<blocks, threads>>>(d_states, (size_t)dim, n_batches);
+        int threads=128, blocks=(n_batches+threads-1)/threads;
+        set_basis0_heads<<<blocks, threads, 0, s>>>(d_states, (size_t)dim, n_batches);
         CUDA_CHECK(cudaGetLastError());
-        CUDA_CHECK(cudaDeviceSynchronize());
     }
-
-    static custatevecHandle_t handle;
-    custatevecCreate(&handle);
 
     cuDoubleComplex x_matrix[4] = {{0, 0}, {1, 0}, {1, 0}, {0, 0}};
     int mat_indices[n_batches];
@@ -163,16 +164,12 @@ int main()
     if (extra_workspace_size_in_bytes_param > 0)
         CUDA_CHECK(cudaMalloc(&extra_workspace_param, extra_workspace_size_in_bytes_param));
 
+    CUDA_CHECK(cudaStreamSynchronize(s));
     auto end_init = std::chrono::steady_clock::now();
-    std::chrono::duration<float> diff_init = end_init - start_init;
-    std::cout << "initialize time: " << diff_init.count() << " [ms]" << std::endl;
+    float diff_init = std::chrono::duration<float, std::milli>(end_init-start_init).count();
 
-    cudaEvent_t start_upd, end_upd;
-    cudaEventCreate(&start_upd);
-    cudaEventCreate(&end_upd);
-
-    // start measuring update
-    cudaEventRecord(start_upd);
+    CUDA_CHECK(cudaStreamSynchronize(s));
+    auto start_upd = std::chrono::steady_clock::now();
 
     for (int layer = 0; layer < n_layers; layer++)
     {
@@ -256,18 +253,20 @@ int main()
     }
 
     // end measuring update
-    cudaEventRecord(end_upd);
-    CUDA_CHECK(cudaEventSynchronize(end_upd));
-    float diff_upd = 0;
-    cudaEventElapsedTime(&diff_upd, start_upd, end_upd);
+    CUDA_CHECK(cudaStreamSynchronize(s));
+    auto end_upd = std::chrono::steady_clock::now();
+    float diff_upd = std::chrono::duration<double, std::milli>(end_upd - start_upd).count();
+
+    std::cout << "initialize time: " << diff_init << " [ms]" << std::endl;
     std::cout << "update time: " << diff_upd << " [ms]" << std::endl;
-    std::cout << "total time: " << diff_init.count() + diff_upd << " [ms]" << std::endl;
+    std::cout << "total time: " << diff_init + diff_upd << " [ms]" << std::endl;
 
     // free resources
     if (extra_workspace_size_in_bytes_cx)
         cudaFree(extra_workspace_cx);
     if (extra_workspace_size_in_bytes_param)
         cudaFree(extra_workspace_param);
-    custatevecDestroy(handle);
     cudaFree(d_states);
+    cudaStreamDestroy(s);
+    custatevecDestroy(handle);
 }

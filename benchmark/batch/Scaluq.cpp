@@ -2,6 +2,16 @@
 #include <vector>
 #include "scaluq/all.hpp"
 
+#define CUDA_CHECK(err)                                                                                                         \
+    {                                                                                                                           \
+        cudaError_t e = err;                                                                                                    \
+        if (e != cudaSuccess)                                                                                                   \
+        {                                                                                                                       \
+            std::cerr << "CUDA Error: " << cudaGetErrorString(e) << " in " << __FILE__ << " at line " << __LINE__ << std::endl; \
+            exit(EXIT_FAILURE);                                                                                                 \
+        }                                                                                                                       \
+    }
+
 struct BenchmarkConfig
 {
     std::uint64_t n_qubits = 16;
@@ -64,25 +74,30 @@ int main()
 {
     scaluq::initialize();
     {
+        Kokkos::fence();
+        auto start_init = std::chrono::steady_clock::now();
+
         BenchmarkResult result{};
         BenchmarkConfig config{};
 
         constexpr scaluq::Precision Prec = scaluq::Precision::F64;
         constexpr scaluq::ExecutionSpace Space = scaluq::ExecutionSpace::Default;
 
-        auto start_init = std::chrono::steady_clock::now();
         auto [states, circuit] = initialize_benchmark<Prec, Space>(config);
+        Kokkos::fence();
         auto end_init = std::chrono::steady_clock::now();
         result.initialization_ms = std::chrono::duration<float, std::milli>(end_init - start_init).count();
 
-        std::cout << "initialize time: " << result.initialization_ms << " [ms]" << std::endl;
-
-        auto start_exec = std::chrono::steady_clock::now();
+        Kokkos::fence();
+        auto start_upd = std::chrono::steady_clock::now();
         run_benchmark(circuit, states, config.n_iterations);
-        auto end_exec = std::chrono::steady_clock::now();
-        result.execution_ms = std::chrono::duration<float, std::milli>(end_exec - start_exec).count();
+        Kokkos::fence();
+        auto end_upd = std::chrono::steady_clock::now();
+        result.execution_ms = std::chrono::duration<float, std::milli>(end_upd - start_upd).count();
+
         result.per_iteration_ms = result.execution_ms / config.n_iterations;
 
+        std::cout << "initialize time: " << result.initialization_ms << " [ms]" << std::endl;
         std::cout << "update time: " << result.execution_ms << " [ms]" << std::endl;
         std::cout << "total time: " << result.initialization_ms + result.execution_ms << " [ms]" << std::endl;
     }
