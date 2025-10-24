@@ -2,7 +2,6 @@ import pytest
 import itertools
 import random
 from scipy.stats import unitary_group
-import scaluq.default.f64 as scaluq # only used for prepare vector
 import scaluq.default.f64.gate as mgate # only used for prepare matrix
 import math
 from typing import Callable
@@ -52,8 +51,9 @@ double_gates = [
     #("2 qubits dense", dense2)
 ]
 
-def random_state(nqubits):
-    vec = scaluq.StateVector.Haar_random_state(nqubits).get_amplitudes()
+def init_state(nqubits):
+    vec = [0]*(2**nqubits)
+    vec[0] = 1
     return cp.array(vec, dtype=dtype)
 
 nqubits_list = range(4, 28)
@@ -92,7 +92,7 @@ single_params = create_params(single_gates)
 @pytest.mark.parametrize(["name", "factory", "nqubits"], single_params)
 def test_Single(benchmark, name, factory, nqubits):
     benchmark.group = name
-    state = random_state(nqubits)
+    state = init_state(nqubits)
     gate_lst = [x for row in factory() for x in row]
     gate = cp.array(gate_lst, dtype=dtype)
     extra = custatevec.apply_matrix_get_workspace_size(handle, dtype_cuquantum, nqubits, gate.data.ptr, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, 1, 0, compute_type)
@@ -106,7 +106,7 @@ single_angle_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), iterto
 @pytest.mark.parametrize(["name", "factory", "nqubits"], single_angle_params)
 def test_SingleAngle(benchmark, name, factory, nqubits):
     benchmark.group = name
-    state = random_state(nqubits)
+    state = init_state(nqubits)
     gate_lst = [x for row in factory(random.random() * math.pi * 2) for x in row]
     gate = cp.array(gate_lst, dtype=dtype)
     extra = custatevec.apply_matrix_get_workspace_size(handle, dtype_cuquantum, nqubits, gate.data.ptr, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, 1, 0, compute_type)
@@ -121,7 +121,7 @@ double_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.pr
 @pytest.mark.parametrize(["name", "factory", "nqubits"], double_params)
 def test_Double(benchmark, name, factory, nqubits):
     benchmark.group = name
-    state = random_state(nqubits)
+    state = init_state(nqubits)
     gate_lst = [x for row in factory() for x in row]
     gate = cp.array(gate_lst, dtype=dtype)
     if name in ["CX", "CZ", "CH"]:

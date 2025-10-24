@@ -11,8 +11,6 @@ def load():
     filepaths = []
 
     for libidx, lib in enumerate(libs):
-        if lib in ["qiskit-aer", "qiskit-aer-custatevec"]:
-            continue
         path = f"./{lib}/*.json"
         flist = glob.glob(path)
         for filepath in flist:
@@ -28,6 +26,7 @@ def load():
     dat1 = defaultdict(lambda: defaultdict(dict))
     dat2 = defaultdict(lambda: defaultdict(dict))
     for name, filepath, filepath_empty in filepaths:
+        print(filepath)
         data = json.load(open(filepath))
         items = data["benchmarks"]
         for item in items:
