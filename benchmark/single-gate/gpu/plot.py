@@ -33,7 +33,6 @@ def load():
     for group in dat1:
         for name in dat1[group]:
             for nqubits in dat1[group][name]:
-                print(group, name, nqubits, dat1[group][name][nqubits])
                 dat[group][name][nqubits] = dat1[group][name][nqubits] / (nqubits * (nqubits - 1) * 100)
     return dat
 
@@ -47,7 +46,7 @@ def plot(dat, group):
         ys = [dat_group[name][x] for x in xs]
         linestyle = 'solid'
         if name.count('('):
-            cid = libnames.index(name[:name.index(' ')])
+            cid = libnames.index(name[:name.index(' (')])
             if name.count('(f64)'):
                 linestyle = 'solid'
             if name.count('(f32)'):
