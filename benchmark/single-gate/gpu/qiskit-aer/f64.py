@@ -8,7 +8,6 @@ from qiskit import QuantumCircuit
 from qiskit.circuit.library import UnitaryGate
 from qiskit_aer import AerSimulator
 from qiskit.compiler import transpile
-import cupy as cp
 
 single_gates = [
     ("X", lambda target, qc: qc.x(target)),
@@ -41,12 +40,11 @@ double_gates = [
 nqubits_list = range(4, 26)
 
 def transpile_on_gpu(qc):
-    backend = AerSimulator(method="statevector", device="GPU", cuStateVec_enable=False)
+    backend = AerSimulator(method="statevector", device="GPU", precision="double", cuStateVec_enable=False)
     return backend, transpile(qc, backend)
 
 def benchfunc(backend, qc):
-    backend.run(qc, shots=1).result()
-    #cp.cuda.runtime.deviceSynchronize()
+    backend.run(qc).result()
 
 def create_params(gates: list[tuple[str, Callable[..., QuantumCircuit]]]):
     return map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(gates, nqubits_list))

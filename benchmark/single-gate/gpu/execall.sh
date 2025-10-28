@@ -1,18 +1,20 @@
 set -eux
-cd scaluq/
-./exec.sh f64
-./exec.sh f32
-./exec.sh f16
-./exec.sh bf16
-cd -
-cd qulacs/
-./exec.sh
-cd -
+#cd scaluq/
+#./exec.sh f64
+#./exec.sh f32
+#./exec.sh f16
+#./exec.sh bf16
+#cd -
+#cd qulacs/
+#./exec.sh
+#cd -
 cd qiskit-aer/
 ./exec.sh f64
+./exec.sh f32
 cd -
 cd qiskit-aer-custatevec/
 ./exec.sh f64
+./exec.sh f32
 cd -
 cd custatevec/
 ./exec.sh f64

@@ -40,7 +40,7 @@ double_gates = [
 nqubits_list = range(4, 26)
 
 def transpile_on_gpu(qc):
-    backend = AerSimulator(method="statevector", device="GPU", precision="double", cuStateVec_enable=True)
+    backend = AerSimulator(method="statevector", device="GPU", precision="single", cuStateVec_enable=False)
     return backend, transpile(qc, backend)
 
 def benchfunc(backend, qc):
@@ -73,7 +73,7 @@ def test_SingleAngle(benchmark, name, factory, nqubits):
                 factory(i, random.random() * math.pi * 2, qc)
     qc.save_statevector()
     benchmark(benchfunc, *transpile_on_gpu(qc))
-    '''
+'''
 
 double_params = map(lambda p: pytest.param(p[0][0], p[0][1], p[1]), itertools.product(double_gates, nqubits_list))
 @pytest.mark.parametrize(["name", "factory", "nqubits"], double_params)

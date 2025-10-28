@@ -40,7 +40,7 @@ double_gates = [
 nqubits_list = range(4, 26)
 
 def transpile_on_gpu(qc):
-    backend = AerSimulator(method="statevector", device="GPU", precision="double", cuStateVec_enable=True)
+    backend = AerSimulator(method="statevector", device="GPU", precision="single", cuStateVec_enable=True)
     return backend, transpile(qc, backend)
 
 def benchfunc(backend, qc):

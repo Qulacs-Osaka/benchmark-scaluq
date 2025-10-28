@@ -5,7 +5,7 @@ from collections import defaultdict
 import os
 
 libs = ["scaluq", "qulacs", "qiskit-aer", "qiskit-aer-custatevec", "custatevec"]
-libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Qiskit-Aer (cuStateVec)", "cuStateVec"]
+libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Qiskit-Aer with cuStateVec", "cuStateVec"]
 
 def load():
     filepaths = []
@@ -16,16 +16,11 @@ def load():
         for filepath in flist:
             libname = libnames[libidx]
             basename = os.path.basename(filepath)
-            filepath_empty = f"./{lib}-empty/{basename}"
-            if lib == "scaluq" or lib == 'custatevec':
-                prec = basename[:-5]
-                filepaths.append((f'{libname} ({prec})', filepath, filepath_empty))
-            else:
-                filepaths.append((f'{libname}', filepath, filepath_empty))
+            prec = basename[:-5]
+            filepaths.append((f'{libname} ({prec})', filepath))
 
     dat1 = defaultdict(lambda: defaultdict(dict))
-    dat2 = defaultdict(lambda: defaultdict(dict))
-    for name, filepath, filepath_empty in filepaths:
+    for name, filepath in filepaths:
         print(filepath)
         data = json.load(open(filepath))
         items = data["benchmarks"]
@@ -34,18 +29,11 @@ def load():
             nqubits = int(item["params"]["nqubits"])
             stats = item["stats"]
             dat1[group][name][nqubits] = stats["mean"]
-        data = json.load(open(filepath_empty))
-        items = data["benchmarks"]
-        for item in items:
-            group = item["group"]
-            nqubits = int(item["params"]["nqubits"])
-            stats = item["stats"]
-            dat2[group][name][nqubits] = stats["mean"]
     dat = defaultdict(lambda: defaultdict(dict))
     for group in dat1:
         for name in dat1[group]:
             for nqubits in dat1[group][name]:
-                # dat[group][name][nqubits] = (dat1[group][name][nqubits] - dat2[group][name][nqubits]) / (nqubits * (nqubits - 1) * 100)
+                print(group, name, nqubits, dat1[group][name][nqubits])
                 dat[group][name][nqubits] = dat1[group][name][nqubits] / (nqubits * (nqubits - 1) * 100)
     return dat
 
