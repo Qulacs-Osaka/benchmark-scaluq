@@ -6,7 +6,7 @@ cd scaluq/
 ./exec.sh bf16
 cd -
 cd qulacs/
-./exec.sh
+./exec.sh f64
 cd -
 cd qiskit-aer/
 ./exec.sh f64
