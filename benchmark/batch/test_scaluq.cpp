@@ -46,7 +46,7 @@ scaluq::Circuit<Prec, Space> create_benchmark_circuit(
             circuit.add_gate(scaluq::gate::RZ<Prec, Space>(i, dist(rng)));
         }
     }
-    return circuit;
+    return std::move(circuit);
 }
 
 template <scaluq::Precision Prec, scaluq::ExecutionSpace Space>
@@ -64,9 +64,9 @@ void run_benchmark(
 template <scaluq::Precision Prec, scaluq::ExecutionSpace Space>
 auto initialize_benchmark(const BenchmarkConfig &config)
 {
-    scaluq::StateVector<Prec, Space> states(config.n_qubits);
+    scaluq::StateVector<Prec, Space> state(config.n_qubits);
     auto circuit = create_benchmark_circuit<Prec, Space>(config.n_qubits, config.n_layers, config.seed);
-    return std::make_tuple(states, circuit);
+    return std::make_tuple(std::move(state), std::move(circuit));
 }
 
 int main()
@@ -82,14 +82,14 @@ int main()
         constexpr scaluq::Precision Prec = scaluq::Precision::F64;
         constexpr scaluq::ExecutionSpace Space = scaluq::ExecutionSpace::Default;
 
-        auto [states, circuit] = initialize_benchmark<Prec, Space>(config);
+        auto [state, circuit] = initialize_benchmark<Prec, Space>(config);
         Kokkos::fence();
         auto end_init = std::chrono::steady_clock::now();
         result.initialization_ms = std::chrono::duration<float, std::milli>(end_init - start_init).count();
 
         Kokkos::fence();
         auto start_upd = std::chrono::steady_clock::now();
-        run_benchmark(circuit, states, config.n_iterations);
+        run_benchmark(circuit, state, config.n_iterations);
         Kokkos::fence();
         auto end_upd = std::chrono::steady_clock::now();
         result.execution_ms = std::chrono::duration<float, std::milli>(end_upd - start_upd).count();
@@ -99,6 +99,13 @@ int main()
         std::cout << "initialize time: " << result.initialization_ms << " [ms]" << std::endl;
         std::cout << "update time: " << result.execution_ms << " [ms]" << std::endl;
         std::cout << "total time: " << result.initialization_ms + result.execution_ms << " [ms]" << std::endl;
+
+        std::cout << "=== Check ===" << std::endl;
+        auto h_states = state.get_amplitudes();
+        for (int i = 0; i < 5; i++)
+        {
+            std::cout << h_states[i] << std::endl;
+        }
     }
     scaluq::finalize();
 }

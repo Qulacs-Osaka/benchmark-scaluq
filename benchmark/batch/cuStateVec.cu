@@ -70,9 +70,7 @@ int main()
 {
     static custatevecHandle_t handle;
     custatevecCreate(&handle);
-    cudaStream_t s;
-    CUDA_CHECK(cudaStreamCreateWithFlags(&s, cudaStreamNonBlocking));
-    custatevecSetStream(handle, s);
+    cudaDeviceSynchronize();
 
     auto start_init = std::chrono::steady_clock::now();
 
@@ -89,11 +87,11 @@ int main()
 
     // initialize states to |0>
     cuDoubleComplex *d_states;
-    CUDA_CHECK(cudaMallocAsync((void **)&d_states, n_batches * dim * sizeof(cuDoubleComplex), s));
-    CUDA_CHECK(cudaMemsetAsync(d_states, 0, (size_t)n_batches*dim*sizeof(cuDoubleComplex), s));
+    CUDA_CHECK(cudaMalloc((void **)&d_states, n_batches * dim * sizeof(cuDoubleComplex)));
+    CUDA_CHECK(cudaMemset(d_states, 0, (size_t)n_batches*dim*sizeof(cuDoubleComplex)));
     {
         int threads=128, blocks=(n_batches+threads-1)/threads;
-        set_basis0_heads<<<blocks, threads, 0, s>>>(d_states, (size_t)dim, n_batches);
+        set_basis0_heads<<<blocks, threads>>>(d_states, (size_t)dim, n_batches);
         CUDA_CHECK(cudaGetLastError());
     }
 
@@ -104,15 +102,18 @@ int main()
     cuDoubleComplex pxs[n_layers * n_qubits][n_batches][4];
     cuDoubleComplex pzs[n_layers * n_qubits][n_batches][4];
     std::random_device rd;
-    std::mt19937 mt(rd());
+    std::uint64_t seed = 0;
+    std::mt19937 mt(seed);
     std::uniform_real_distribution<double> distribution(0.0, 2.0 * M_PI);
     std::vector<double> angles1(n_batches), angles2(n_batches);
     for (int i = 0; i < n_layers * n_qubits; i++)
     {
-        for (int j = 0; j < n_batches; j++)
+        angles1[0] = distribution(mt);
+        angles2[0] = distribution(mt);
+        for (int j = 0; j < n_batches-1; j++)
         {
-            angles1[j] = distribution(mt);
-            angles2[j] = distribution(mt);
+            angles1[j+1] = angles1[j];
+            angles2[j+1] = angles2[j];
         }
         make_rx(pxs[i], angles1);
         make_rz(pzs[i], angles2);
@@ -164,11 +165,11 @@ int main()
     if (extra_workspace_size_in_bytes_param > 0)
         CUDA_CHECK(cudaMalloc(&extra_workspace_param, extra_workspace_size_in_bytes_param));
 
-    CUDA_CHECK(cudaStreamSynchronize(s));
+    cudaDeviceSynchronize();
     auto end_init = std::chrono::steady_clock::now();
     float diff_init = std::chrono::duration<float, std::milli>(end_init-start_init).count();
 
-    CUDA_CHECK(cudaStreamSynchronize(s));
+    cudaDeviceSynchronize();
     auto start_upd = std::chrono::steady_clock::now();
 
     for (int layer = 0; layer < n_layers; layer++)
@@ -253,7 +254,7 @@ int main()
     }
 
     // end measuring update
-    CUDA_CHECK(cudaStreamSynchronize(s));
+    cudaDeviceSynchronize();
     auto end_upd = std::chrono::steady_clock::now();
     float diff_upd = std::chrono::duration<double, std::milli>(end_upd - start_upd).count();
 
@@ -261,12 +262,20 @@ int main()
     std::cout << "update time: " << diff_upd << " [ms]" << std::endl;
     std::cout << "total time: " << diff_init + diff_upd << " [ms]" << std::endl;
 
+    cuDoubleComplex* h_states = nullptr;
+    CUDA_CHECK(cudaMallocHost(&h_states, static_cast<size_t>(n_batches)*dim*sizeof(cuDoubleComplex)));
+    cudaMemcpy(h_states, d_states, n_batches*dim* sizeof(cuDoubleComplex),
+               cudaMemcpyDeviceToHost);
+    std::cout << "=== Check ===" << std::endl;
+    for(int i=0;i<5;i++){
+        std::cout <<"(" << h_states[i].x << ", " << h_states[i].y << ")" << std::endl;
+    }
+
     // free resources
     if (extra_workspace_size_in_bytes_cx)
         cudaFree(extra_workspace_cx);
     if (extra_workspace_size_in_bytes_param)
         cudaFree(extra_workspace_param);
     cudaFree(d_states);
-    cudaStreamDestroy(s);
     custatevecDestroy(handle);
 }
