@@ -85,7 +85,13 @@
         "span": "cpp",
         "stdfloat": "cpp",
         "valarray": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "shared_mutex": "cpp",
+        "cfenv": "cpp",
+        "csignal": "cpp",
+        "strstream": "cpp",
+        "source_location": "cpp",
+        "typeindex": "cpp"
     },
     "[cpp]": {
         "editor.wordBasedSuggestions": "off",
