@@ -39,7 +39,7 @@ double_gates = [
     #("2 qubits dense", dense2)
 ]
 
-nqubits_list = range(4, 26)
+nqubits_list = range(4, 22)
 
 
 def benchfunc(circuit, state):

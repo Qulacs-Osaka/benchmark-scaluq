@@ -38,7 +38,7 @@ double_gates = [
     #("2 qubits dense", dense2)
 ]
 
-nqubits_list = range(4, 26)
+nqubits_list = range(4, 22)
 
 def transpile_on_gpu(qc):
     backend = AerSimulator(method="statevector", device="GPU", cuStateVec_enable=False)
