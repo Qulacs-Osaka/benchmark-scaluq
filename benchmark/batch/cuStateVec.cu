@@ -19,9 +19,21 @@
         }                                                                                                                       \
     }
 
+#define SV_CHECK(call)                                                          \
+    do                                                                          \
+    {                                                                           \
+        custatevecStatus_t st = (call);                                         \
+        if (st != CUSTATEVEC_STATUS_SUCCESS)                                    \
+        {                                                                       \
+            std::cerr << "cuStateVec Error " << st << " at " << __FILE__ << ":" \
+                      << __LINE__ << std::endl;                                 \
+            std::exit(EXIT_FAILURE);                                            \
+        }                                                                       \
+    } while (0)
+
 // batch個のRXゲートを作る関数
 // matricesはn_batches*4のサイズであることを要求
-void make_rx(cuDoubleComplex (*matrices)[4], std::vector<double> angles)
+void make_rx(cuDoubleComplex (*matrices)[4], const std::vector<double> &angles)
 {
     for (int i = 0; i < angles.size(); i++)
     {
@@ -34,7 +46,7 @@ void make_rx(cuDoubleComplex (*matrices)[4], std::vector<double> angles)
 }
 
 // batch個のRZゲートを作る関数
-void make_rz(cuDoubleComplex (*matrices)[4], std::vector<double> angles)
+void make_rz(cuDoubleComplex (*matrices)[4], const std::vector<double> &angles)
 {
     for (int i = 0; i < angles.size(); i++)
     {
@@ -59,11 +71,13 @@ void initialize_states(cuDoubleComplex *states, int n_qubits, int n_batches)
     }
 }
 
-__global__ void set_basis0_heads(cuDoubleComplex* states, size_t dim, int n_batches){
-  int b = blockIdx.x*blockDim.x + threadIdx.x;
-  if(b < n_batches){
-    states[static_cast<size_t>(b)*dim + 0] = make_cuDoubleComplex(1.0, 0.0);
-  }
+__global__ void set_basis0_heads(cuDoubleComplex *states, size_t dim, int n_batches)
+{
+    int b = blockIdx.x * blockDim.x + threadIdx.x;
+    if (b < n_batches)
+    {
+        states[static_cast<size_t>(b) * dim + 0] = make_cuDoubleComplex(1.0, 0.0);
+    }
 }
 
 int main()
@@ -76,11 +90,12 @@ int main()
 
     // 各種パラメータ設定＋ベクトル・行列の初期化
     const int n_qubits = 16;
+    const int n_batches = 1024;
     const int n_layers = 1;
+    const int n_iterations = 1;
     const int dim = (1 << n_qubits);
     const int n_targets = 1;
     const int n_controls = 1;
-    const int n_batches = 1024;
     int target_index[1];
     int control_index[1];
     const int control_value[1] = {1};
@@ -88,9 +103,9 @@ int main()
     // initialize states to |0>
     cuDoubleComplex *d_states;
     CUDA_CHECK(cudaMalloc((void **)&d_states, n_batches * dim * sizeof(cuDoubleComplex)));
-    CUDA_CHECK(cudaMemset(d_states, 0, (size_t)n_batches*dim*sizeof(cuDoubleComplex)));
+    CUDA_CHECK(cudaMemset(d_states, 0, (size_t)n_batches * dim * sizeof(cuDoubleComplex)));
     {
-        int threads=128, blocks=(n_batches+threads-1)/threads;
+        int threads = 128, blocks = (n_batches + threads - 1) / threads;
         set_basis0_heads<<<blocks, threads>>>(d_states, (size_t)dim, n_batches);
         CUDA_CHECK(cudaGetLastError());
     }
@@ -110,10 +125,10 @@ int main()
     {
         angles1[0] = distribution(mt);
         angles2[0] = distribution(mt);
-        for (int j = 0; j < n_batches-1; j++)
+        for (int j = 0; j < n_batches - 1; j++)
         {
-            angles1[j+1] = angles1[j];
-            angles2[j+1] = angles2[j];
+            angles1[j + 1] = angles1[j];
+            angles2[j + 1] = angles2[j];
         }
         make_rx(pxs[i], angles1);
         make_rz(pzs[i], angles2);
@@ -124,7 +139,7 @@ int main()
     size_t extra_workspace_size_in_bytes_cx = 0;
     size_t extra_workspace_size_in_bytes_param = 0;
     // CX: check the size of external workspace
-    custatevecApplyMatrixBatchedGetWorkspaceSize(
+    SV_CHECK(custatevecApplyMatrixBatchedGetWorkspaceSize(
         handle,
         CUDA_C_64F,
         n_qubits,
@@ -140,12 +155,12 @@ int main()
         n_targets,
         n_controls,
         CUSTATEVEC_COMPUTE_64F,
-        &extra_workspace_size_in_bytes_cx);
+        &extra_workspace_size_in_bytes_cx));
     if (extra_workspace_size_in_bytes_cx > 0)
         CUDA_CHECK(cudaMalloc(&extra_workspace_cx, extra_workspace_size_in_bytes_cx));
 
     // ParamRX, ParamRZ: check the size of external workspace
-    custatevecApplyMatrixBatchedGetWorkspaceSize(
+    SV_CHECK(custatevecApplyMatrixBatchedGetWorkspaceSize(
         handle,
         CUDA_C_64F,
         n_qubits,
@@ -161,95 +176,98 @@ int main()
         n_targets,
         0, // n_controls for parametric gate is 0
         CUSTATEVEC_COMPUTE_64F,
-        &extra_workspace_size_in_bytes_param);
+        &extra_workspace_size_in_bytes_param));
     if (extra_workspace_size_in_bytes_param > 0)
         CUDA_CHECK(cudaMalloc(&extra_workspace_param, extra_workspace_size_in_bytes_param));
 
     cudaDeviceSynchronize();
     auto end_init = std::chrono::steady_clock::now();
-    float diff_init = std::chrono::duration<float, std::milli>(end_init-start_init).count();
+    float diff_init = std::chrono::duration<float, std::milli>(end_init - start_init).count();
 
     cudaDeviceSynchronize();
     auto start_upd = std::chrono::steady_clock::now();
 
-    for (int layer = 0; layer < n_layers; layer++)
+    for (int itr = 0; itr < n_iterations; itr++)
     {
-        for (int q = 0; q < n_qubits; q++)
+        for (int layer = 0; layer < n_layers; layer++)
         {
-            // apply CX
-            target_index[0] = (q + 1) % n_qubits;
-            control_index[0] = q;
-            custatevecApplyMatrixBatched(
-                handle,
-                d_states,
-                CUDA_C_64F,
-                n_qubits,
-                n_batches,
-                dim,
-                CUSTATEVEC_MATRIX_MAP_TYPE_BROADCAST,
-                nullptr,
-                x_matrix,
-                CUDA_C_64F,
-                CUSTATEVEC_MATRIX_LAYOUT_ROW,
-                false,
-                n_batches,
-                target_index,
-                n_targets,
-                control_index,
-                control_value,
-                n_controls,
-                CUSTATEVEC_COMPUTE_64F,
-                extra_workspace_cx,
-                extra_workspace_size_in_bytes_cx);
+            for (int q = 0; q < n_qubits; q++)
+            {
+                // apply CX
+                target_index[0] = (q + 1) % n_qubits;
+                control_index[0] = q;
+                SV_CHECK(custatevecApplyMatrixBatched(
+                    handle,
+                    d_states,
+                    CUDA_C_64F,
+                    n_qubits,
+                    n_batches,
+                    dim,
+                    CUSTATEVEC_MATRIX_MAP_TYPE_BROADCAST,
+                    nullptr,
+                    x_matrix,
+                    CUDA_C_64F,
+                    CUSTATEVEC_MATRIX_LAYOUT_ROW,
+                    false,
+                    n_batches,
+                    target_index,
+                    n_targets,
+                    control_index,
+                    control_value,
+                    n_controls,
+                    CUSTATEVEC_COMPUTE_64F,
+                    extra_workspace_cx,
+                    extra_workspace_size_in_bytes_cx));
 
-            // apply ParamRX
-            target_index[0] = q;
-            custatevecApplyMatrixBatched(
-                handle,
-                d_states,
-                CUDA_C_64F,
-                n_qubits,
-                n_batches,
-                dim,
-                CUSTATEVEC_MATRIX_MAP_TYPE_MATRIX_INDEXED,
-                mat_indices,
-                pxs[layer * n_qubits + q],
-                CUDA_C_64F,
-                CUSTATEVEC_MATRIX_LAYOUT_ROW,
-                false,
-                n_batches,
-                target_index,
-                n_targets,
-                nullptr,
-                nullptr,
-                0, // n_controls for parametric gate is 0
-                CUSTATEVEC_COMPUTE_64F,
-                extra_workspace_param,
-                extra_workspace_size_in_bytes_param);
+                // apply ParamRX
+                target_index[0] = q;
+                SV_CHECK(custatevecApplyMatrixBatched(
+                    handle,
+                    d_states,
+                    CUDA_C_64F,
+                    n_qubits,
+                    n_batches,
+                    dim,
+                    CUSTATEVEC_MATRIX_MAP_TYPE_MATRIX_INDEXED,
+                    mat_indices,
+                    pxs[layer * n_qubits + q],
+                    CUDA_C_64F,
+                    CUSTATEVEC_MATRIX_LAYOUT_ROW,
+                    false,
+                    n_batches,
+                    target_index,
+                    n_targets,
+                    nullptr,
+                    nullptr,
+                    0, // n_controls for parametric gate is 0
+                    CUSTATEVEC_COMPUTE_64F,
+                    extra_workspace_param,
+                    extra_workspace_size_in_bytes_param));
 
-            // apply ParamRZ
-            custatevecApplyMatrixBatched(
-                handle,
-                d_states,
-                CUDA_C_64F,
-                n_qubits,
-                n_batches,
-                dim,
-                CUSTATEVEC_MATRIX_MAP_TYPE_MATRIX_INDEXED,
-                mat_indices,
-                pzs[layer * n_qubits + q],
-                CUDA_C_64F,
-                CUSTATEVEC_MATRIX_LAYOUT_ROW,
-                false,
-                n_batches,
-                target_index,
-                n_targets,
-                nullptr,
-                nullptr,
-                0, // n_controls for parametric gate is 0
-                CUSTATEVEC_COMPUTE_64F,
-                extra_workspace_param,
-                extra_workspace_size_in_bytes_param);
+                // apply ParamRZ
+                SV_CHECK(custatevecApplyMatrixBatched(
+                    handle,
+                    d_states,
+                    CUDA_C_64F,
+                    n_qubits,
+                    n_batches,
+                    dim,
+                    CUSTATEVEC_MATRIX_MAP_TYPE_MATRIX_INDEXED,
+                    mat_indices,
+                    pzs[layer * n_qubits + q],
+                    CUDA_C_64F,
+                    CUSTATEVEC_MATRIX_LAYOUT_ROW,
+                    false,
+                    n_batches,
+                    target_index,
+                    n_targets,
+                    nullptr,
+                    nullptr,
+                    0, // n_controls for parametric gate is 0
+                    CUSTATEVEC_COMPUTE_64F,
+                    extra_workspace_param,
+                    extra_workspace_size_in_bytes_param));
+            }
         }
     }
 
@@ -262,13 +280,14 @@ int main()
     std::cout << "update time: " << diff_upd << " [ms]" << std::endl;
     std::cout << "total time: " << diff_init + diff_upd << " [ms]" << std::endl;
 
-    cuDoubleComplex* h_states = nullptr;
-    CUDA_CHECK(cudaMallocHost(&h_states, static_cast<size_t>(n_batches)*dim*sizeof(cuDoubleComplex)));
-    cudaMemcpy(h_states, d_states, n_batches*dim* sizeof(cuDoubleComplex),
+    cuDoubleComplex *h_states = nullptr;
+    CUDA_CHECK(cudaMallocHost(&h_states, static_cast<size_t>(n_batches) * dim * sizeof(cuDoubleComplex)));
+    cudaMemcpy(h_states, d_states, n_batches * dim * sizeof(cuDoubleComplex),
                cudaMemcpyDeviceToHost);
     std::cout << "=== Check ===" << std::endl;
-    for(int i=0;i<5;i++){
-        std::cout <<"(" << h_states[i].x << ", " << h_states[i].y << ")" << std::endl;
+    for (int i = 0; i < 5; i++)
+    {
+        std::cout << "(" << h_states[i].x << ", " << h_states[i].y << ")" << std::endl;
     }
 
     // free resources

@@ -47,7 +47,7 @@ scaluq::Circuit<Prec, Space> create_benchmark_circuit(
             circuit.add_gate(scaluq::gate::RZ<Prec, Space>(i, dist(rng)));
         }
     }
-    return circuit;
+    return std::move(circuit);
 }
 
 template <scaluq::Precision Prec, scaluq::ExecutionSpace Space>
@@ -67,7 +67,7 @@ auto initialize_benchmark(const BenchmarkConfig &config)
 {
     scaluq::StateVectorBatched<Prec, Space> states(config.n_batches, config.n_qubits);
     auto circuit = create_benchmark_circuit<Prec, Space>(config.n_qubits, config.n_layers, config.seed);
-    return std::make_tuple(states, circuit);
+    return std::make_tuple(std::move(states), std::move(circuit));
 }
 
 int main()
@@ -100,6 +100,13 @@ int main()
         std::cout << "initialize time: " << result.initialization_ms << " [ms]" << std::endl;
         std::cout << "update time: " << result.execution_ms << " [ms]" << std::endl;
         std::cout << "total time: " << result.initialization_ms + result.execution_ms << " [ms]" << std::endl;
+
+        std::cout << "=== Check ===" << std::endl;
+        auto h_states = states.get_amplitudes();
+        for (int i = 0; i < 5; i++)
+        {
+            std::cout << h_states[0][i] << std::endl;
+        }
     }
     scaluq::finalize();
 }
