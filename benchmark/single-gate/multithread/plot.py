@@ -11,8 +11,6 @@ def load():
     filepaths = []
 
     for libidx, lib in enumerate(libs):
-        if lib in ["qiskit-aer", "qiskit-aer-custatevec"]:
-            continue
         path = f"./{lib}/*.json"
         flist = glob.glob(path)
         for filepath in flist:
