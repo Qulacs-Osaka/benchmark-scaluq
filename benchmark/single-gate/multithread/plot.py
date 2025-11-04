@@ -22,6 +22,7 @@ def load():
     cpuinfo = None
     dat1 = defaultdict(lambda: defaultdict(dict))
     for name, filepath in filepaths:
+        print(filepath)
         data = json.load(open(filepath))
         cpu = f'{data["machine_info"]["cpu"]["brand_raw"]} {data["machine_info"]["cpu"]["count"]}T'
         assert cpuinfo == None or cpuinfo == cpu
@@ -45,6 +46,7 @@ def plot(dat, group, cpu):
     dat_group = dat[group]
     cmap = plt.get_cmap("tab10")
     for name in dat_group:
+        print(name)
         xs = list(sorted(dat_group[name].keys()))
         ys = [dat_group[name][x] for x in xs]
         linestyle = 'solid'
@@ -57,8 +59,6 @@ def plot(dat, group, cpu):
             linestyle = 'dashdot'
         if name.count('(bf16)'):
             linestyle = 'dotted'
-        if name.count('(cuStateVec)'):
-            linestyle = 'dashed'
         plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle)
 
     plt.title(f"{group} {cpu}")
