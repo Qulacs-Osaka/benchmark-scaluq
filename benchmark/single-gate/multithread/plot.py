@@ -21,9 +21,13 @@ def load():
             prec = basename[:-5]
             filepaths.append((f'{libname} ({prec})', filepath))
 
+    cpuinfo = None
     dat1 = defaultdict(lambda: defaultdict(dict))
     for name, filepath in filepaths:
         data = json.load(open(filepath))
+        cpu = f'{data["machine_info"]["cpu"]["brand_raw"]} {data["machine_info"]["cpu"]["count"]}T'
+        assert cpuinfo == None or cpuinfo == cpu
+        cpuinfo = cpu
         items = data["benchmarks"]
         for item in items:
             group = item["group"]
@@ -35,10 +39,10 @@ def load():
         for name in dat1[group]:
             for nqubits in dat1[group][name]:
                 dat[group][name][nqubits] = dat1[group][name][nqubits] / (nqubits * (nqubits - 1) * 100)
-    return dat
+    return dat, cpuinfo
 
 
-def plot(dat, group):
+def plot(dat, group, cpu):
     assert len(group) > 0
     dat_group = dat[group]
     cmap = plt.get_cmap("tab10")
@@ -59,7 +63,7 @@ def plot(dat, group):
             linestyle = 'dashed'
         plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle)
 
-    plt.title(f"{group}")
+    plt.title(f"{group} {cpu}")
     plt.yscale("log")
     plt.grid(which='major', color='black', linestyle='-', alpha=0.3)
     plt.grid(which='minor', color='black', linestyle='-', alpha=0.1)
@@ -72,13 +76,13 @@ def plot(dat, group):
 
 
 if __name__ == "__main__":
-    dat = load()
+    dat, cpu = load()
 
     for group in dat.keys():
         if group != 'CX':
             continue
         plt.figure(figsize=(12, 6))
-        plot(dat, group)
+        plot(dat, group, cpu)
         plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1.0))
         plt.tight_layout()
         plt.savefig(f"./image/{group}.pdf")
