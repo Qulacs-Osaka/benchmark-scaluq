@@ -8,6 +8,8 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #define CUDA_CHECK(err)                                                                                                         \
     {                                                                                                                           \
@@ -80,8 +82,17 @@ __global__ void set_basis0_heads(cuDoubleComplex *states, size_t dim, int n_batc
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc < 4)
+    {
+        std::cerr << "Usage: " << argv[0] << " <n_qubits> <n_batches> <csv_path>" << std::endl;
+        std::cerr << "  <n_qubits> : positive integer (e.g., 4, 8, 16)" << std::endl;
+        std::cerr << "  <n_batches>: positive integer (e.g., 1, 32, 1024)" << std::endl;
+        std::cerr << "  <csv_path> : output CSV file" << std::endl;
+        return EXIT_FAILURE;
+    }
+
     static custatevecHandle_t handle;
     custatevecCreate(&handle);
     cudaDeviceSynchronize();
@@ -89,10 +100,10 @@ int main()
     auto start_init = std::chrono::steady_clock::now();
 
     // 各種パラメータ設定＋ベクトル・行列の初期化
-    const int n_qubits = 16;
-    const int n_batches = 1024;
+    const int n_qubits = strtol(argv[1]);
+    const int n_batches = strtol(argv[2]);
     const int n_layers = 1;
-    const int n_iterations = 1;
+    const int n_iterations = 100;
     const int dim = (1 << n_qubits);
     const int n_targets = 1;
     const int n_controls = 1;
@@ -284,11 +295,23 @@ int main()
     CUDA_CHECK(cudaMallocHost(&h_states, static_cast<size_t>(n_batches) * dim * sizeof(cuDoubleComplex)));
     cudaMemcpy(h_states, d_states, n_batches * dim * sizeof(cuDoubleComplex),
                cudaMemcpyDeviceToHost);
-    std::cout << "=== Check ===" << std::endl;
-    for (int i = 0; i < 5; i++)
+
+    string csv_path = argv[3];
+    std::ofstream ofs(csv_path, std::ios::out | std::ios::app);
+    if (!ofs)
     {
-        std::cout << "(" << h_states[i].x << ", " << h_states[i].y << ")" << std::endl;
+        std::cerr << "cannot open csv: " << csv_path << std::endl;
+        return 1;
     }
+
+    double total_ms = diff_init + diff_upd;
+    float per_iter_total_ms = total_ms / std::max(1, n_iterations);
+    ofs << "custatevec" << ','
+        << n_qubits << ','
+        << n_batches << ','
+        << n_iterations << ','
+        << seed << ','
+        << per_iter_total_ms << '\n';
 
     // free resources
     if (extra_workspace_size_in_bytes_cx)

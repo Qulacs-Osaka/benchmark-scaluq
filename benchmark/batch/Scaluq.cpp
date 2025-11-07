@@ -17,7 +17,7 @@ struct BenchmarkConfig
     std::uint64_t n_qubits = 16;
     std::uint64_t n_batches = 1024;
     std::uint64_t n_layers = 1;
-    std::uint64_t n_iterations = 1;
+    std::uint64_t n_iterations = 100;
     std::uint64_t seed = 0;
 };
 
@@ -70,15 +70,24 @@ auto initialize_benchmark(const BenchmarkConfig &config)
     return std::make_tuple(std::move(states), std::move(circuit));
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc < 4)
+    {
+        std::cerr << "Usage: " << argv[0] << " <n_qubits> <n_batches> <csv_path>" << std::endl;
+        std::cerr << "  <n_qubits> : positive integer (e.g., 4, 8, 16)" << std::endl;
+        std::cerr << "  <n_batches>: positive integer (e.g., 1, 32, 1024)" << std::endl;
+        std::cerr << "  <csv_path> : output CSV file" << std::endl;
+        return EXIT_FAILURE;
+    }
+
     scaluq::initialize();
     {
         Kokkos::fence();
         auto start_init = std::chrono::steady_clock::now();
 
         BenchmarkResult result{};
-        BenchmarkConfig config{};
+        BenchmarkConfig config{strtol(argv[1]), strtol(argv[2]), 1, 100, 0};
 
         constexpr scaluq::Precision Prec = scaluq::Precision::F64;
         constexpr scaluq::ExecutionSpace Space = scaluq::ExecutionSpace::Default;
@@ -101,12 +110,22 @@ int main()
         std::cout << "update time: " << result.execution_ms << " [ms]" << std::endl;
         std::cout << "total time: " << result.initialization_ms + result.execution_ms << " [ms]" << std::endl;
 
-        std::cout << "=== Check ===" << std::endl;
-        auto h_states = states.get_amplitudes();
-        for (int i = 0; i < 5; i++)
+        string csv_path = argv[3];
+        std::ofstream ofs(csv_path, std::ios::out | std::ios::app);
+        if (!ofs)
         {
-            std::cout << h_states[0][i] << std::endl;
+            std::cerr << "cannot open csv: " << csv_path << std::endl;
+            return 1;
         }
+
+        double total_ms = diff_init + diff_upd;
+        float per_iter_total_ms = total_ms / std::max(1, n_iterations);
+        ofs << "custatevec" << ','
+            << n_qubits << ','
+            << n_batches << ','
+            << n_iterations << ','
+            << seed << ','
+            << per_iter_total_ms << '\n';
     }
     scaluq::finalize();
 }
