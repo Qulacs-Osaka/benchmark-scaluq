@@ -66,4 +66,4 @@ function(exe name)
     )
 endfunction()
 
-exe(Scaluq)
+exe(Scaluq_two_bench)

@@ -1,0 +1,3 @@
+backend,n_qubits,n_batches,n_iterations,seed,per_iteration_ms
+scaluq_range,16,1024,100,0,65.9
+scaluq_range,16,1024,100,0,25.7896
