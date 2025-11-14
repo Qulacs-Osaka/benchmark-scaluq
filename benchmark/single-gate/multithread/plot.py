@@ -6,6 +6,7 @@ import os
 
 libs = ["scaluq", "qulacs", "qiskit-aer"]
 libnames = ["Sclauq", "Qulacs", "Qiskit-Aer"]
+f64_only = True
 
 def load():
     filepaths = []
@@ -17,7 +18,11 @@ def load():
             libname = libnames[libidx]
             basename = os.path.basename(filepath)
             prec = basename[:-5]
-            filepaths.append((f'{libname} ({prec})', filepath))
+            if f64_only:
+                if prec == 'f64':
+                    filepaths.append((f'{libname}', filepath))
+            else:
+                filepaths.append((f'{libname} ({prec})', filepath))
 
     cpuinfo = None
     dat1 = defaultdict(lambda: defaultdict(dict))
@@ -50,7 +55,10 @@ def plot(dat, group, cpu):
         xs = list(sorted(dat_group[name].keys()))
         ys = [dat_group[name][x] for x in xs]
         linestyle = 'solid'
-        cid = libnames.index(name[:name.index(' (')])
+        if ' (' in name:
+            cid = libnames.index(name[:name.index(' (')])
+        else:
+            cid = libnames.index(name)
         if name.count('(f64)'):
             linestyle = 'solid'
         if name.count('(f32)'):
@@ -61,7 +69,7 @@ def plot(dat, group, cpu):
             linestyle = 'dotted'
         plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle)
 
-    plt.title(f"{group} {cpu}")
+    plt.title(f"{group} Gate apply@{cpu}")
     plt.yscale("log")
     plt.grid(which='major', color='black', linestyle='-', alpha=0.3)
     plt.grid(which='minor', color='black', linestyle='-', alpha=0.1)
