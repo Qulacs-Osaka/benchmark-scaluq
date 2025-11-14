@@ -6,6 +6,7 @@ import os
 
 libs = ["scaluq", "qulacs", "qiskit-aer", "qiskit-aer-custatevec", "custatevec"]
 libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Qiskit-Aer with cuStateVec", "cuStateVec"]
+only_f64 = True
 
 def load():
     filepaths = []
@@ -17,7 +18,11 @@ def load():
             libname = libnames[libidx]
             basename = os.path.basename(filepath)
             prec = basename[:-5]
-            filepaths.append((f'{libname} ({prec})', filepath))
+            if only_f64:
+                if prec == 'f64':
+                    filepaths.append((f'{libname}', filepath))
+            else:
+                filepaths.append((f'{libname} ({prec})', filepath))
 
     dat1 = defaultdict(lambda: defaultdict(dict))
     for name, filepath in filepaths:
@@ -61,7 +66,7 @@ def plot(dat, group):
             cid = libnames.index(name)
         plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle)
 
-    plt.title(f"{group}")
+    plt.title(f"{group} Gate apply@Nvidia A100 40 GB")
     plt.yscale("log")
     plt.grid(which='major', color='black', linestyle='-', alpha=0.3)
     plt.grid(which='minor', color='black', linestyle='-', alpha=0.1)
