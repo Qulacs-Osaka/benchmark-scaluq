@@ -86,7 +86,7 @@ if __name__ == "__main__":
             continue
         plt.figure(figsize=(12, 6))
         plot(dat, group)
-        plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1.0))
+        plt.legend(fontsize=10)
         plt.tight_layout()
         plt.savefig(f"./image/{group}.pdf")
         plt.savefig(f"./image/{group}.png")
