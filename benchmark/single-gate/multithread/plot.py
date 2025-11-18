@@ -75,7 +75,7 @@ def plot(dat, group, cpu):
     plt.grid(which='minor', color='black', linestyle='-', alpha=0.1)
     plt.xlabel("# of qubits", fontsize=16)
     plt.ylabel("Time [sec]", fontsize=16)
-    plt.xticks(list(range(4, 25, 5)), fontsize=16)
+    plt.xticks(list(range(5, 26, 5)), fontsize=16)
     plt.yticks(fontsize=16)
 
 
