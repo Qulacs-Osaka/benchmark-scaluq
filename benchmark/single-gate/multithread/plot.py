@@ -87,9 +87,9 @@ if __name__ == "__main__":
     for group in dat.keys():
         if group != 'CX':
             continue
-        plt.figure(figsize=(12, 6))
+        plt.figure()
         plot(dat, group, cpu)
-        plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1.0))
+        plt.legend(fontsize=10)
         plt.tight_layout()
         plt.savefig(f"./image/{group}.pdf")
         plt.savefig(f"./image/{group}.png")
