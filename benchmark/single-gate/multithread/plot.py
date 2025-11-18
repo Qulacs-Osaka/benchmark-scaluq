@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import os
 
-libs = ["scaluq", "qulacs", "qiskit-aer"]
-libnames = ["Sclauq", "Qulacs", "Qiskit-Aer"]
+libs = ["scaluq", "qulacs", "qiskit-aer", "project-q"]
+libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Project Q"]
 f64_only = True
 
 def load():
