@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import os
 
-libs = ["scaluq", "qulacs", "qiskit-aer"]
-libnames = ["Sclauq", "Qulacs", "Qiskit-Aer"]
+libs = ["scaluq", "qulacs", "qiskit-aer", "project-q"]
+libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Project Q"]
 f64_only = True
 
 def load():
@@ -67,7 +67,7 @@ def plot(dat, group, cpu):
             linestyle = 'dashdot'
         if name.count('(bf16)'):
             linestyle = 'dotted'
-        plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle)
+        plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle, marker='o')
 
     plt.title(f"{group} Gate apply@{cpu}")
     plt.yscale("log")
@@ -75,7 +75,7 @@ def plot(dat, group, cpu):
     plt.grid(which='minor', color='black', linestyle='-', alpha=0.1)
     plt.xlabel("# of qubits", fontsize=16)
     plt.ylabel("Time [sec]", fontsize=16)
-    plt.xticks(list(range(4, 25)), fontsize=16)
+    plt.xticks(list(range(5, 26, 5)), fontsize=16)
     plt.yticks(fontsize=16)
 
 
@@ -87,9 +87,9 @@ if __name__ == "__main__":
     for group in dat.keys():
         if group != 'CX':
             continue
-        plt.figure(figsize=(12, 6))
+        plt.figure()
         plot(dat, group, cpu)
-        plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1.0))
+        plt.legend(fontsize=10)
         plt.tight_layout()
         plt.savefig(f"./image/{group}.pdf")
         plt.savefig(f"./image/{group}.png")
