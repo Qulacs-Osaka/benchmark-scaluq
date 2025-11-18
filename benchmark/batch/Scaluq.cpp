@@ -1,5 +1,12 @@
 #include <iostream>
 #include <vector>
+#include <string>
+#include <fstream>
+#include <chrono>
+#include <random>
+#include <tuple>
+#include <numbers>
+#include <cstdint>
 #include "scaluq/all.hpp"
 
 #define CUDA_CHECK(err)                                                                                                         \
@@ -86,8 +93,10 @@ int main(int argc, char *argv[])
         Kokkos::fence();
         auto start_init = std::chrono::steady_clock::now();
 
+        const auto n_qubits = static_cast<std::uint64_t>(std::strtoull(argv[1], nullptr, 10));
+        const auto n_batches = static_cast<std::uint64_t>(std::strtoull(argv[2], nullptr, 10));
         BenchmarkResult result{};
-        BenchmarkConfig config{strtol(argv[1]), strtol(argv[2]), 1, 100, 0};
+        BenchmarkConfig config{n_qubits, n_batches, 1, 100, 0};
 
         constexpr scaluq::Precision Prec = scaluq::Precision::F64;
         constexpr scaluq::ExecutionSpace Space = scaluq::ExecutionSpace::Default;
@@ -110,7 +119,7 @@ int main(int argc, char *argv[])
         std::cout << "update time: " << result.execution_ms << " [ms]" << std::endl;
         std::cout << "total time: " << result.initialization_ms + result.execution_ms << " [ms]" << std::endl;
 
-        string csv_path = argv[3];
+        std::string csv_path = argv[3];
         std::ofstream ofs(csv_path, std::ios::out | std::ios::app);
         if (!ofs)
         {
@@ -118,14 +127,12 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        double total_ms = diff_init + diff_upd;
-        float per_iter_total_ms = total_ms / std::max(1, n_iterations);
-        ofs << "custatevec" << ','
-            << n_qubits << ','
-            << n_batches << ','
-            << n_iterations << ','
-            << seed << ','
-            << per_iter_total_ms << '\n';
+        ofs << "scaluq" << ','
+            << config.n_qubits << ','
+            << config.n_batches << ','
+            << config.n_iterations << ','
+            << config.seed << ','
+            << result.per_iteration_ms << '\n';
     }
     scaluq::finalize();
 }

@@ -8,6 +8,11 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <string>
+#include <fstream>
+#include <tuple>
+#include <numbers>
+#include <cstdint>
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -100,8 +105,8 @@ int main(int argc, char *argv[])
     auto start_init = std::chrono::steady_clock::now();
 
     // 各種パラメータ設定＋ベクトル・行列の初期化
-    const int n_qubits = strtol(argv[1]);
-    const int n_batches = strtol(argv[2]);
+    const uint64_t n_qubits = strtol(argv[1], nullptr, 10);
+    const uint64_t n_batches = strtol(argv[2], nullptr, 10);
     const int n_layers = 1;
     const int n_iterations = 100;
     const int dim = (1 << n_qubits);
@@ -296,7 +301,7 @@ int main(int argc, char *argv[])
     cudaMemcpy(h_states, d_states, n_batches * dim * sizeof(cuDoubleComplex),
                cudaMemcpyDeviceToHost);
 
-    string csv_path = argv[3];
+    std::string csv_path = argv[3];
     std::ofstream ofs(csv_path, std::ios::out | std::ios::app);
     if (!ofs)
     {

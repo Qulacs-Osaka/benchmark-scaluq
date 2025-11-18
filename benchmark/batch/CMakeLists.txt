@@ -62,7 +62,8 @@ function(exe name)
     )
 
     target_compile_options(${name} PRIVATE
-        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
+        $<$<COMPILE_LANGUAGE:CXX>:-O2>
+        $<$<COMPILE_LANGUAGE:CUDA>:-O2 --expt-relaxed-constexpr>
     )
 endfunction()
 
