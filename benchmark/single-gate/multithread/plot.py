@@ -67,7 +67,7 @@ def plot(dat, group, cpu):
             linestyle = 'dashdot'
         if name.count('(bf16)'):
             linestyle = 'dotted'
-        plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle)
+        plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle, marker='o')
 
     plt.title(f"{group} Gate apply@{cpu}")
     plt.yscale("log")
