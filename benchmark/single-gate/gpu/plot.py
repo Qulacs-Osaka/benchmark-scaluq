@@ -84,7 +84,7 @@ if __name__ == "__main__":
     for group in dat.keys():
         if group != 'CX':
             continue
-        plt.figure(figsize=(12, 6))
+        plt.figure()
         plot(dat, group)
         plt.legend(fontsize=10)
         plt.tight_layout()
