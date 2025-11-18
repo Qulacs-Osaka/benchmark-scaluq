@@ -64,7 +64,7 @@ def plot(dat, group):
                 linestyle = 'dashed'
         else:
             cid = libnames.index(name)
-        plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle)
+        plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle, marker='o')
 
     plt.title(f"{group} Gate apply@Nvidia A100 40 GB")
     plt.yscale("log")
