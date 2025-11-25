@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import os
 
-libs = ["scaluq", "qulacs", "qiskit-aer", "qiskit-aer-custatevec", "custatevec"]
-libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Qiskit-Aer with cuStateVec", "cuStateVec"]
+#libs = ["scaluq", "qulacs", "qiskit-aer", "qiskit-aer-custatevec", "custatevec"]
+#libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Qiskit-Aer with cuStateVec", "cuStateVec"]
+libs = ["scaluq", "qulacs", "custatevec"]
+libnames = ["Sclauq", "Qulacs", "cuStateVec"]
 only_f64 = True
 
 def load():
