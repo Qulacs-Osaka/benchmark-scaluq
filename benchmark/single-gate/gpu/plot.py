@@ -7,7 +7,8 @@ import os
 #libs = ["scaluq", "qulacs", "qiskit-aer", "qiskit-aer-custatevec", "custatevec"]
 #libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Qiskit-Aer with cuStateVec", "cuStateVec"]
 libs = ["scaluq", "qulacs", "custatevec"]
-libnames = ["Sclauq", "Qulacs", "cuStateVec"]
+libnames = ["Proposal", "Qulacs", "cuStateVec"]
+markers = ['P', 'o', '^']
 only_f64 = True
 
 def load():
@@ -66,14 +67,14 @@ def plot(dat, group):
                 linestyle = 'dashed'
         else:
             cid = libnames.index(name)
-        plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle, marker='o')
+        plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle, marker=markers[cid])
 
     plt.title(f"{group} Gate apply@Nvidia A100 40 GB")
     plt.yscale("log")
     plt.grid(which='major', color='black', linestyle='-', alpha=0.3)
     plt.grid(which='minor', color='black', linestyle='-', alpha=0.1)
-    plt.xlabel("# of qubits", fontsize=16)
-    plt.ylabel("Time [sec]", fontsize=16)
+    plt.xlabel("Number of qubits", fontsize=16)
+    plt.ylabel("Execution time per iteration [ms]", fontsize=16)
     plt.xticks(fontsize=16)
     plt.yticks(fontsize=16)
 
@@ -86,11 +87,11 @@ if __name__ == "__main__":
     for group in dat.keys():
         if group != 'CX':
             continue
-        plt.figure()
+        plt.figure(figsize=(7, 5))
         plot(dat, group)
-        plt.legend(fontsize=10)
+        plt.legend(fontsize=18)
         plt.tight_layout()
-        plt.savefig(f"./image/{group}.pdf")
-        plt.savefig(f"./image/{group}.png")
+        #plt.savefig(f"./image/{group}.pdf")
+        plt.savefig(f"./image/{group}.png", dpi=300)
         plt.clf()
 
