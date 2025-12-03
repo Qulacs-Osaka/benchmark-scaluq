@@ -87,6 +87,7 @@ if __name__ == "__main__":
     for group in dat.keys():
         if group != 'CX':
             continue
+        plt.rcParams["font.size"] = 18
         plt.figure(figsize=(7, 5))
         plot(dat, group)
         plt.legend(fontsize=18)
