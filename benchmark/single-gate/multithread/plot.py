@@ -72,7 +72,7 @@ def plot(dat, group, cpu):
             linestyle = 'dotted'
         plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle, marker=markers[cid])
 
-    plt.title(f"{group} Gate apply@{cpu}")
+    #plt.title(f"{group} Gate apply@{cpu}")
     plt.yscale("log")
     plt.grid(which='major', color='black', linestyle='-', alpha=0.3)
     plt.grid(which='minor', color='black', linestyle='-', alpha=0.1)
@@ -90,6 +90,7 @@ if __name__ == "__main__":
     for group in dat.keys():
         if group != 'CX':
             continue
+        plt.rcParams["font.size"] = 18
         plt.figure(figsize=(7, 5))
         plot(dat, group, cpu)
         plt.legend(fontsize=18)
