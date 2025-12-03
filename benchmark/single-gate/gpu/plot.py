@@ -69,7 +69,7 @@ def plot(dat, group):
             cid = libnames.index(name)
         plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle, marker=markers[cid])
 
-    plt.title(f"{group} Gate apply@Nvidia A100 40 GB")
+    #plt.title(f"{group} Gate apply@Nvidia A100 40 GB")
     plt.yscale("log")
     plt.grid(which='major', color='black', linestyle='-', alpha=0.3)
     plt.grid(which='minor', color='black', linestyle='-', alpha=0.1)
