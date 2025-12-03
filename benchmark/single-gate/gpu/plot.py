@@ -41,7 +41,7 @@ def load():
     for group in dat1:
         for name in dat1[group]:
             for nqubits in dat1[group][name]:
-                dat[group][name][nqubits] = dat1[group][name][nqubits] / (nqubits * (nqubits - 1) * 100)
+                dat[group][name][nqubits] = dat1[group][name][nqubits] / (nqubits * (nqubits - 1) * 100) * 1000
     return dat
 
 
