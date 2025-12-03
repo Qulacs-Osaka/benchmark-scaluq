@@ -7,7 +7,8 @@ import os
 # libs = ["scaluq", "qulacs", "qiskit-aer", "project-q"]
 # libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Project Q"]
 libs = ["scaluq", "qulacs"]
-libnames = ["Sclauq", "Qulacs"]
+libnames = ["Proposal", "Qulacs"]
+markers = ['P', 'o']
 f64_only = True
 
 def load():
@@ -44,7 +45,7 @@ def load():
     for group in dat1:
         for name in dat1[group]:
             for nqubits in dat1[group][name]:
-                dat[group][name][nqubits] = dat1[group][name][nqubits] / (nqubits * (nqubits - 1) * 100)
+                dat[group][name][nqubits] = dat1[group][name][nqubits] / (nqubits * (nqubits - 1) * 100) * 1000
     return dat, cpuinfo
 
 
@@ -69,14 +70,14 @@ def plot(dat, group, cpu):
             linestyle = 'dashdot'
         if name.count('(bf16)'):
             linestyle = 'dotted'
-        plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle, marker='o')
+        plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle, marker=markers[cid])
 
     plt.title(f"{group} Gate apply@{cpu}")
     plt.yscale("log")
     plt.grid(which='major', color='black', linestyle='-', alpha=0.3)
     plt.grid(which='minor', color='black', linestyle='-', alpha=0.1)
-    plt.xlabel("# of qubits", fontsize=16)
-    plt.ylabel("Time [sec]", fontsize=16)
+    plt.xlabel("Number of qubits", fontsize=16)
+    plt.ylabel("Execution time per iteration [ms]", fontsize=16)
     plt.xticks(list(range(5, 26, 5)), fontsize=16)
     plt.yticks(fontsize=16)
 
@@ -89,11 +90,11 @@ if __name__ == "__main__":
     for group in dat.keys():
         if group != 'CX':
             continue
-        plt.figure()
+        plt.figure(figsize=(7, 5))
         plot(dat, group, cpu)
-        plt.legend(fontsize=10)
+        plt.legend(fontsize=18)
         plt.tight_layout()
         plt.savefig(f"./image/{group}.pdf")
-        plt.savefig(f"./image/{group}.png")
+        plt.savefig(f"./image/{group}.png", dpi=300)
         plt.clf()
 
