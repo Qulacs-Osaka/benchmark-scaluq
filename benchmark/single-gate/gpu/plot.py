@@ -9,6 +9,7 @@ import os
 libs = ["scaluq", "qulacs", "custatevec"]
 libnames = ["Proposal", "Qulacs", "cuStateVec"]
 markers = ['P', 'o', '^']
+colors = ['tab:red', 'tab:blue', 'tab:gray']
 only_f64 = True
 
 def load():
@@ -67,7 +68,7 @@ def plot(dat, group):
                 linestyle = 'dashed'
         else:
             cid = libnames.index(name)
-        plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle, marker=markers[cid])
+        plt.plot(xs, ys, label=name, c=colors[cid], linestyle=linestyle, marker=markers[cid])
 
     #plt.title(f"{group} Gate apply@Nvidia A100 40 GB")
     plt.yscale("log")
