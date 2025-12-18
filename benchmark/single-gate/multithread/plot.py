@@ -8,6 +8,7 @@ import os
 # libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Project Q"]
 libs = ["scaluq", "qulacs"]
 libnames = ["Proposal", "Qulacs"]
+colors = ['tab:red', 'tab:blue']
 markers = ['P', 'o']
 f64_only = True
 
@@ -70,7 +71,7 @@ def plot(dat, group, cpu):
             linestyle = 'dashdot'
         if name.count('(bf16)'):
             linestyle = 'dotted'
-        plt.plot(xs, ys, label=name, c=cmap(cid), linestyle=linestyle, marker=markers[cid])
+        plt.plot(xs, ys, label=name, c=colors[cid], linestyle=linestyle, marker=markers[cid])
 
     #plt.title(f"{group} Gate apply@{cpu}")
     plt.yscale("log")
