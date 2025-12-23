@@ -11,6 +11,6 @@ cd -
 cd qiskit-aer-custatevec/
 ./exec.sh f64
 cd -
-#cd custatevec/
+cd custatevec/
 ./exec.sh f64
 cd -
