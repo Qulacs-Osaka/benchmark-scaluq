@@ -7,7 +7,7 @@ import os
 #libs = ["scaluq", "qulacs", "qiskit-aer", "qiskit-aer-custatevec", "custatevec"]
 #libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Qiskit-Aer with cuStateVec", "cuStateVec"]
 libs = ["scaluq", "qulacs", "custatevec", "qiskit-aer", "qiskit-aer-custatevec"]
-libnames = ["Proposal", "Qulacs", "cuStateVec", "qiskit-aer", "qiskit-aer-custatevec"]
+libnames = ["Proposal", "Qulacs", "cuStateVec", "Qiskit-Aer", "Qiskit-Aer with cuStateVec"]
 markers = ['P', 'o', '^', 's', 'D']
 colors = ['tab:red', 'tab:blue', 'tab:gray', "tab:green", "tab:purple"]
 only_f64 = True
@@ -86,8 +86,6 @@ if __name__ == "__main__":
     dat = load()
 
     for group in dat.keys():
-        if group != 'CX':
-            continue
         plt.rcParams["font.size"] = 18
         plt.figure(figsize=(7, 5))
         plot(dat, group)
