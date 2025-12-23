@@ -134,3 +134,4 @@ dmypy.json
 .benchmarks
 
 benchmark/single-gate/**/*.json
+benchmark/multiple-gate/**/*.json
