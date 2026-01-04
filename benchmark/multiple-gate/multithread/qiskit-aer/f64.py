@@ -5,7 +5,7 @@ from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from qiskit.compiler import transpile
 
-nqubits_list = list(range(4, 26))
+nqubits_list = list(range(4, 28))
 
 def transpile_on_gpu(qc):
     backend = AerSimulator(method="statevector", device="CPU", precision="double")
