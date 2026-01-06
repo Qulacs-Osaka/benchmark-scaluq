@@ -8,7 +8,7 @@ from qiskit.compiler import transpile
 nqubits_list = list(range(4, 28))
 
 def transpile_on_cpu(qc):
-    backend = AerSimulator(method="statevector", device="CPU", precision="double", fusion_enable=False)
+    backend = AerSimulator(method="statevector", device="CPU", precision="double", fusion_enable=False, max_job_size=1)
     return backend, transpile(qc, backend, optimization_level=0)
 
 def benchfunc(backend, qc):
