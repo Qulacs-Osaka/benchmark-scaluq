@@ -8,8 +8,8 @@ from qiskit.compiler import transpile
 nqubits_list = list(range(4, 26))
 
 def transpile_on_gpu(qc):
-    backend = AerSimulator(method="statevector", device="GPU", precision="double", cuStateVec_enable=False)
-    return backend, transpile(qc, backend)
+    backend = AerSimulator(method="statevector", device="GPU", precision="double", cuStateVec_enable=False, fusion_enable=False)
+    return backend, transpile(qc, backend, optimization_level=0)
 
 def benchfunc(backend, qc):
     for _ in range(100):
