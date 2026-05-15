@@ -1,0 +1,10 @@
+set -eux
+cd scaluq/
+./exec.sh f64
+cd -
+cd qulacs/
+./exec.sh f64
+cd -
+cd qiskit-aer/
+./exec.sh f64
+cd -
