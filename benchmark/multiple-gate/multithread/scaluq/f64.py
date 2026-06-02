@@ -16,7 +16,7 @@ def benchfunc(circuit, state):
 def test(benchmark, nqubits):
     random.seed(nqubits)
     benchmark.group = 'circuit'
-    circuit = scaluq.Circuit(nqubits)
+    circuit = scaluq.Circuit()
     for i in range(nqubits):
         circuit.add_gate(mgate.CX(i, (i+1) % nqubits))
         circuit.add_gate(mgate.RX(i, random.uniform(0, math.pi * 2)))
