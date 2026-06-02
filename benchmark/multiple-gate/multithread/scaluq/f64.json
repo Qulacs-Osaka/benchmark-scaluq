@@ -1,0 +1,1308 @@
+{
+    "machine_info": {
+        "node": "744b78b1817e",
+        "processor": "x86_64",
+        "machine": "x86_64",
+        "python_compiler": "Clang 22.1.3 ",
+        "python_implementation": "CPython",
+        "python_implementation_version": "3.12.13",
+        "python_version": "3.12.13",
+        "python_build": [
+            "main",
+            "May 10 2026 19:30:01"
+        ],
+        "release": "6.8.0-50-generic",
+        "system": "Linux",
+        "cpu": {
+            "python_version": "3.12.13.final.0 (64 bit)",
+            "cpuinfo_version": [
+                9,
+                0,
+                0
+            ],
+            "cpuinfo_version_string": "9.0.0",
+            "arch": "X86_64",
+            "bits": 64,
+            "count": 64,
+            "arch_string_raw": "x86_64",
+            "vendor_id_raw": "AuthenticAMD",
+            "brand_raw": "AMD EPYC 7532 32-Core Processor",
+            "hz_advertised_friendly": "1.7718 GHz",
+            "hz_actual_friendly": "1.7718 GHz",
+            "hz_advertised": [
+                1771810000,
+                0
+            ],
+            "hz_actual": [
+                1771810000,
+                0
+            ],
+            "model": 49,
+            "family": 23,
+            "flags": [
+                "3dnowext",
+                "3dnowprefetch",
+                "abm",
+                "adx",
+                "aes",
+                "aperfmperf",
+                "apic",
+                "arat",
+                "avic",
+                "avx",
+                "avx2",
+                "bmi1",
+                "bmi2",
+                "bpext",
+                "cat_l3",
+                "cdp_l3",
+                "clflush",
+                "clflushopt",
+                "clwb",
+                "clzero",
+                "cmov",
+                "cmp_legacy",
+                "constant_tsc",
+                "cpb",
+                "cpuid",
+                "cqm",
+                "cqm_llc",
+                "cqm_mbm_local",
+                "cqm_mbm_total",
+                "cqm_occup_llc",
+                "cr8_legacy",
+                "cx16",
+                "cx8",
+                "dbx",
+                "de",
+                "decodeassists",
+                "extapic",
+                "extd_apicid",
+                "f16c",
+                "flushbyasid",
+                "fma",
+                "fpu",
+                "fsgsbase",
+                "fxsr",
+                "fxsr_opt",
+                "ht",
+                "hw_pstate",
+                "ibpb",
+                "ibrs",
+                "ibs",
+                "irperf",
+                "lahf_lm",
+                "lbrv",
+                "lm",
+                "mba",
+                "mca",
+                "mce",
+                "misalignsse",
+                "mmx",
+                "mmxext",
+                "monitor",
+                "movbe",
+                "msr",
+                "mtrr",
+                "mwaitx",
+                "nonstop_tsc",
+                "nopl",
+                "npt",
+                "nrip_save",
+                "nx",
+                "osvw",
+                "osxsave",
+                "overflow_recov",
+                "pae",
+                "pat",
+                "pausefilter",
+                "pci_l2i",
+                "pclmulqdq",
+                "pdpe1gb",
+                "perfctr_core",
+                "perfctr_llc",
+                "perfctr_nb",
+                "pfthreshold",
+                "pge",
+                "pni",
+                "popcnt",
+                "pqe",
+                "pqm",
+                "pse",
+                "pse36",
+                "rapl",
+                "rdpid",
+                "rdpru",
+                "rdrand",
+                "rdrnd",
+                "rdseed",
+                "rdt_a",
+                "rdtscp",
+                "rep_good",
+                "sep",
+                "sev",
+                "sev_es",
+                "sha",
+                "sha_ni",
+                "skinit",
+                "smap",
+                "smca",
+                "smep",
+                "ssbd",
+                "sse",
+                "sse2",
+                "sse4_1",
+                "sse4_2",
+                "sse4a",
+                "ssse3",
+                "stibp",
+                "succor",
+                "svm",
+                "svm_lock",
+                "syscall",
+                "tce",
+                "topoext",
+                "tsc",
+                "tsc_scale",
+                "umip",
+                "v_spec_ctrl",
+                "v_vmsave_vmload",
+                "vgif",
+                "vmcb_clean",
+                "vme",
+                "vmmcall",
+                "wbnoinvd",
+                "wdt",
+                "x2apic",
+                "xgetbv1",
+                "xsave",
+                "xsavec",
+                "xsaveerptr",
+                "xsaveopt",
+                "xsaves"
+            ],
+            "l3_cache_size": 524288,
+            "l2_cache_size": 33554432,
+            "l1_data_cache_size": 2097152,
+            "l1_instruction_cache_size": 2097152,
+            "l2_cache_line_size": 512,
+            "l2_cache_associativity": 6
+        }
+    },
+    "commit_info": {
+        "id": "unversioned",
+        "time": null,
+        "author_time": null,
+        "dirty": false,
+        "project": "scaluq",
+        "branch": "(unknown)"
+    },
+    "benchmarks": [
+        {
+            "group": "circuit",
+            "name": "test[4]",
+            "fullname": "f64.py::test[4]",
+            "params": {
+                "nqubits": 4
+            },
+            "param": "4",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.8898717008996755,
+                "max": 0.9349745761137456,
+                "mean": 0.9123684600461275,
+                "stddev": 0.019621801558429307,
+                "rounds": 5,
+                "median": 0.9149877121672034,
+                "iqr": 0.03528360644122586,
+                "q1": 0.8937170980498195,
+                "q3": 0.9290007044910453,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 0.8898717008996755,
+                "hd15iqr": 0.9349745761137456,
+                "ops": 1.0960484100353953,
+                "total": 4.561842300230637,
+                "data": [
+                    0.8898717008996755,
+                    0.8949988970998675,
+                    0.9349745761137456,
+                    0.9270094139501452,
+                    0.9149877121672034
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[5]",
+            "fullname": "f64.py::test[5]",
+            "params": {
+                "nqubits": 5
+            },
+            "param": "5",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.669997536111623,
+                "max": 1.1567593028303236,
+                "mean": 1.0441482435911893,
+                "stddev": 0.2095134745942696,
+                "rounds": 5,
+                "median": 1.1309819540474564,
+                "iqr": 0.13293573848204687,
+                "q1": 1.0105026449891739,
+                "q3": 1.1434383834712207,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 1.1240043479483575,
+                "hd15iqr": 1.1567593028303236,
+                "ops": 0.9577184141599011,
+                "total": 5.220741217955947,
+                "data": [
+                    1.1567593028303236,
+                    1.1309819540474564,
+                    1.1389980770181865,
+                    0.669997536111623,
+                    1.1240043479483575
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[6]",
+            "fullname": "f64.py::test[6]",
+            "params": {
+                "nqubits": 6
+            },
+            "param": "6",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 1.3468771278858185,
+                "max": 1.3981162749696523,
+                "mean": 1.363594858860597,
+                "stddev": 0.02067092891973741,
+                "rounds": 5,
+                "median": 1.3539999842178077,
+                "iqr": 0.02404400601517409,
+                "q1": 1.3507200125604868,
+                "q3": 1.3747640185756609,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 1.3468771278858185,
+                "hd15iqr": 1.3981162749696523,
+                "ops": 0.7333556543587937,
+                "total": 6.817974294302985,
+                "data": [
+                    1.366979933110997,
+                    1.3981162749696523,
+                    1.3468771278858185,
+                    1.3539999842178077,
+                    1.3520009741187096
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[7]",
+            "fullname": "f64.py::test[7]",
+            "params": {
+                "nqubits": 7
+            },
+            "param": "7",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.5047842601779848,
+                "max": 1.599995365133509,
+                "mean": 1.220791849307716,
+                "stddev": 0.5130579879700025,
+                "rounds": 5,
+                "median": 1.5690092421136796,
+                "iqr": 0.8301504683913663,
+                "q1": 0.7593361111357808,
+                "q3": 1.5894865795271471,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 0.5047842601779848,
+                "hd15iqr": 1.599995365133509,
+                "ops": 0.8191404624523647,
+                "total": 6.1039592465385795,
+                "data": [
+                    1.5859836509916931,
+                    1.599995365133509,
+                    1.5690092421136796,
+                    0.5047842601779848,
+                    0.8441867281217128
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[8]",
+            "fullname": "f64.py::test[8]",
+            "params": {
+                "nqubits": 8
+            },
+            "param": "8",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 1.8049761289730668,
+                "max": 1.8600050078239292,
+                "mean": 1.8302973051555456,
+                "stddev": 0.02301552497270075,
+                "rounds": 5,
+                "median": 1.8209966740105301,
+                "iqr": 0.03739286126801744,
+                "q1": 1.8139919795794412,
+                "q3": 1.8513848408474587,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 1.8049761289730668,
+                "hd15iqr": 1.8600050078239292,
+                "ops": 0.5463593248939501,
+                "total": 9.151486525777727,
+                "data": [
+                    1.8049761289730668,
+                    1.8169972631148994,
+                    1.8209966740105301,
+                    1.8600050078239292,
+                    1.8485114518553019
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[9]",
+            "fullname": "f64.py::test[9]",
+            "params": {
+                "nqubits": 9
+            },
+            "param": "9",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 1.9939661310054362,
+                "max": 2.0850037480704486,
+                "mean": 2.0275898425839842,
+                "stddev": 0.036755606638546205,
+                "rounds": 5,
+                "median": 2.0279848789796233,
+                "iqr": 0.05050675314851105,
+                "q1": 1.9962407788843848,
+                "q3": 2.046747532032896,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 1.9939661310054362,
+                "hd15iqr": 2.0850037480704486,
+                "ops": 0.4931963945556111,
+                "total": 10.13794921291992,
+                "data": [
+                    1.9939661310054362,
+                    2.0339954600203782,
+                    2.0850037480704486,
+                    2.0279848789796233,
+                    1.9969989948440343
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[10]",
+            "fullname": "f64.py::test[10]",
+            "params": {
+                "nqubits": 10
+            },
+            "param": "10",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.5411781668663025,
+                "max": 2.2500722019467503,
+                "mean": 1.2889922913629561,
+                "stddev": 0.7638185961472816,
+                "rounds": 5,
+                "median": 0.9168187810573727,
+                "iqr": 1.314404641627334,
+                "q1": 0.7180385903920978,
+                "q3": 2.032443232019432,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 0.5411781668663025,
+                "hd15iqr": 2.2500722019467503,
+                "ops": 0.7757998296038053,
+                "total": 6.444961456814781,
+                "data": [
+                    2.2500722019467503,
+                    1.959900242043659,
+                    0.7769920649006963,
+                    0.9168187810573727,
+                    0.5411781668663025
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[11]",
+            "fullname": "f64.py::test[11]",
+            "params": {
+                "nqubits": 11
+            },
+            "param": "11",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.4459910998120904,
+                "max": 2.527982310159132,
+                "mean": 2.5031885678414256,
+                "stddev": 0.033631133217723104,
+                "rounds": 5,
+                "median": 2.5139869970735162,
+                "iqr": 0.038495677057653666,
+                "q1": 2.487992249778472,
+                "q3": 2.5264879268361256,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 2.4459910998120904,
+                "hd15iqr": 2.527982310159132,
+                "ops": 0.3994904790022791,
+                "total": 12.515942839207128,
+                "data": [
+                    2.4459910998120904,
+                    2.52598979906179,
+                    2.5139869970735162,
+                    2.527982310159132,
+                    2.501992633100599
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[12]",
+            "fullname": "f64.py::test[12]",
+            "params": {
+                "nqubits": 12
+            },
+            "param": "12",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.6938931699842215,
+                "max": 2.7359963001217693,
+                "mean": 2.712174576846883,
+                "stddev": 0.01637731476168915,
+                "rounds": 5,
+                "median": 2.714997350005433,
+                "iqr": 0.022537155426107347,
+                "q1": 2.6984623800963163,
+                "q3": 2.7209995355224237,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 2.6938931699842215,
+                "hd15iqr": 2.7359963001217693,
+                "ops": 0.36870782896379,
+                "total": 13.560872884234414,
+                "data": [
+                    2.6938931699842215,
+                    2.7359963001217693,
+                    2.6999854501336813,
+                    2.714997350005433,
+                    2.7160006139893085
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[13]",
+            "fullname": "f64.py::test[13]",
+            "params": {
+                "nqubits": 13
+            },
+            "param": "13",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.9279727758839726,
+                "max": 2.9440002779010683,
+                "mean": 2.9357920719776303,
+                "stddev": 0.007831919441789055,
+                "rounds": 5,
+                "median": 2.9339963670354337,
+                "iqr": 0.01526315975934267,
+                "q1": 2.9287366539938375,
+                "q3": 2.94399981375318,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 2.9279727758839726,
+                "hd15iqr": 2.9440002779010683,
+                "ops": 0.3406235780609532,
+                "total": 14.678960359888151,
+                "data": [
+                    2.9279727758839726,
+                    2.9339963670354337,
+                    2.9440002779010683,
+                    2.928991280030459,
+                    2.9439996590372175
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[14]",
+            "fullname": "f64.py::test[14]",
+            "params": {
+                "nqubits": 14
+            },
+            "param": "14",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.101972865872085,
+                "max": 3.2129954679403454,
+                "mean": 3.1547865827567874,
+                "stddev": 0.04612289811580362,
+                "rounds": 5,
+                "median": 3.137965494999662,
+                "iqr": 0.07499373360769823,
+                "q1": 3.1222488317871466,
+                "q3": 3.197242565394845,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 3.101972865872085,
+                "hd15iqr": 3.2129954679403454,
+                "ops": 0.31697865252303603,
+                "total": 15.773932913783938,
+                "data": [
+                    3.137965494999662,
+                    3.191991597879678,
+                    3.129007487092167,
+                    3.101972865872085,
+                    3.2129954679403454
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[15]",
+            "fullname": "f64.py::test[15]",
+            "params": {
+                "nqubits": 15
+            },
+            "param": "15",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.336011210922152,
+                "max": 3.4329968101810664,
+                "mean": 3.388988577015698,
+                "stddev": 0.03795733210108026,
+                "rounds": 5,
+                "median": 3.3959987848065794,
+                "iqr": 0.057257454143837094,
+                "q1": 3.3599733052542433,
+                "q3": 3.4172307593980804,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 3.336011210922152,
+                "hd15iqr": 3.4329968101810664,
+                "ops": 0.2950732872875564,
+                "total": 16.94494288507849,
+                "data": [
+                    3.367960670031607,
+                    3.3959987848065794,
+                    3.4329968101810664,
+                    3.336011210922152,
+                    3.411975409137085
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[16]",
+            "fullname": "f64.py::test[16]",
+            "params": {
+                "nqubits": 16
+            },
+            "param": "16",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.539993949001655,
+                "max": 3.651003499981016,
+                "mean": 3.613579138368368,
+                "stddev": 0.04335392340019537,
+                "rounds": 5,
+                "median": 3.625981008866802,
+                "iqr": 0.04507843783358112,
+                "q1": 3.5954294249531813,
+                "q3": 3.6405078627867624,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 3.539993949001655,
+                "hd15iqr": 3.651003499981016,
+                "ops": 0.2767339420858866,
+                "total": 18.06789569184184,
+                "data": [
+                    3.6139079169370234,
+                    3.539993949001655,
+                    3.6370093170553446,
+                    3.625981008866802,
+                    3.651003499981016
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[17]",
+            "fullname": "f64.py::test[17]",
+            "params": {
+                "nqubits": 17
+            },
+            "param": "17",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.019892551936209,
+                "max": 3.886992385145277,
+                "mean": 3.6595738118048757,
+                "stddev": 0.35974398552809217,
+                "rounds": 5,
+                "median": 3.799997688969597,
+                "iqr": 0.22652982349973172,
+                "q1": 3.5967156177503057,
+                "q3": 3.8232454412500374,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 3.788989973021671,
+                "hd15iqr": 3.886992385145277,
+                "ops": 0.27325586295711496,
+                "total": 18.29786905902438,
+                "data": [
+                    3.019892551936209,
+                    3.788989973021671,
+                    3.8019964599516243,
+                    3.799997688969597,
+                    3.886992385145277
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[18]",
+            "fullname": "f64.py::test[18]",
+            "params": {
+                "nqubits": 18
+            },
+            "param": "18",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.9689737639855593,
+                "max": 4.0890019631478935,
+                "mean": 4.059989784425125,
+                "stddev": 0.05125364782932675,
+                "rounds": 5,
+                "median": 4.081975865876302,
+                "iqr": 0.04050837969407439,
+                "q1": 4.046991774463095,
+                "q3": 4.087500154157169,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 4.072997777955607,
+                "hd15iqr": 4.0890019631478935,
+                "ops": 0.24630603846250695,
+                "total": 20.299948922125623,
+                "data": [
+                    3.9689737639855593,
+                    4.0890019631478935,
+                    4.072997777955607,
+                    4.081975865876302,
+                    4.086999551160261
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[19]",
+            "fullname": "f64.py::test[19]",
+            "params": {
+                "nqubits": 19
+            },
+            "param": "19",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 4.317982989829034,
+                "max": 4.387990607181564,
+                "mean": 4.342401007981971,
+                "stddev": 0.030042373863140015,
+                "rounds": 5,
+                "median": 4.32701641600579,
+                "iqr": 0.04520312062231824,
+                "q1": 4.320275774400216,
+                "q3": 4.365478895022534,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 4.317982989829034,
+                "hd15iqr": 4.387990607181564,
+                "ops": 0.23028734521796884,
+                "total": 21.712005039909855,
+                "data": [
+                    4.357974990969524,
+                    4.387990607181564,
+                    4.317982989829034,
+                    4.321040035923943,
+                    4.32701641600579
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[20]",
+            "fullname": "f64.py::test[20]",
+            "params": {
+                "nqubits": 20
+            },
+            "param": "20",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.9279746448155493,
+                "max": 4.549976452952251,
+                "mean": 4.300188404554501,
+                "stddev": 0.2541771973615548,
+                "rounds": 5,
+                "median": 4.265048729954287,
+                "iqr": 0.3775785204488784,
+                "q1": 4.155182950140443,
+                "q3": 4.532761470589321,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 3.9279746448155493,
+                "hd15iqr": 4.549976452952251,
+                "ops": 0.23254795044348756,
+                "total": 21.500942022772506,
+                "data": [
+                    3.9279746448155493,
+                    4.265048729954287,
+                    4.230919051915407,
+                    4.527023143135011,
+                    4.549976452952251
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[21]",
+            "fullname": "f64.py::test[21]",
+            "params": {
+                "nqubits": 21
+            },
+            "param": "21",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 4.7569897749926895,
+                "max": 4.826809193007648,
+                "mean": 4.798386732768267,
+                "stddev": 0.02887317312511578,
+                "rounds": 5,
+                "median": 4.794165899045765,
+                "iqr": 0.04444320616312325,
+                "q1": 4.780991566716693,
+                "q3": 4.825434772879817,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 4.7569897749926895,
+                "hd15iqr": 4.826809193007648,
+                "ops": 0.2084033771540302,
+                "total": 23.991933663841337,
+                "data": [
+                    4.824976632837206,
+                    4.788992163958028,
+                    4.794165899045765,
+                    4.826809193007648,
+                    4.7569897749926895
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[22]",
+            "fullname": "f64.py::test[22]",
+            "params": {
+                "nqubits": 22
+            },
+            "param": "22",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 4.986997188068926,
+                "max": 5.085982116870582,
+                "mean": 5.028976148413494,
+                "stddev": 0.040461278413240494,
+                "rounds": 5,
+                "median": 5.011994109023362,
+                "iqr": 0.06218987860484049,
+                "q1": 5.000492721854243,
+                "q3": 5.062682600459084,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 4.986997188068926,
+                "hd15iqr": 5.085982116870582,
+                "ops": 0.19884763229896665,
+                "total": 25.14488074206747,
+                "data": [
+                    5.0549160949885845,
+                    5.004991233116016,
+                    4.986997188068926,
+                    5.011994109023362,
+                    5.085982116870582
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[23]",
+            "fullname": "f64.py::test[23]",
+            "params": {
+                "nqubits": 23
+            },
+            "param": "23",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 5.1319746458902955,
+                "max": 5.269989978056401,
+                "mean": 5.225790018541739,
+                "stddev": 0.053889818658395865,
+                "rounds": 5,
+                "median": 5.241996650816873,
+                "iqr": 0.041275581694208086,
+                "q1": 5.211478593875654,
+                "q3": 5.252754175569862,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 5.2379799098707736,
+                "hd15iqr": 5.269989978056401,
+                "ops": 0.19135862643770193,
+                "total": 26.128950092708692,
+                "data": [
+                    5.1319746458902955,
+                    5.247008908074349,
+                    5.2379799098707736,
+                    5.269989978056401,
+                    5.241996650816873
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[24]",
+            "fullname": "f64.py::test[24]",
+            "params": {
+                "nqubits": 24
+            },
+            "param": "24",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 5.547992110950872,
+                "max": 5.670002270955592,
+                "mean": 5.6360314365942035,
+                "stddev": 0.05007533531373613,
+                "rounds": 5,
+                "median": 5.650216415990144,
+                "iqr": 0.04253322636941448,
+                "q1": 5.622962578956503,
+                "q3": 5.665495805325918,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 5.6479527349583805,
+                "hd15iqr": 5.670002270955592,
+                "ops": 0.17742981231564775,
+                "total": 28.180157182971016,
+                "data": [
+                    5.650216415990144,
+                    5.663993650116026,
+                    5.670002270955592,
+                    5.6479527349583805,
+                    5.547992110950872
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[25]",
+            "fullname": "f64.py::test[25]",
+            "params": {
+                "nqubits": 25
+            },
+            "param": "25",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 6.702932559885085,
+                "max": 6.889584529912099,
+                "mean": 6.823053742572665,
+                "stddev": 0.07516372017981816,
+                "rounds": 5,
+                "median": 6.832877239212394,
+                "iqr": 0.10166027653031051,
+                "q1": 6.781937391904648,
+                "q3": 6.883597668434959,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 6.702932559885085,
+                "hd15iqr": 6.889584529912099,
+                "ops": 0.14656194099138742,
+                "total": 34.115268712863326,
+                "data": [
+                    6.702932559885085,
+                    6.889584529912099,
+                    6.881602047942579,
+                    6.832877239212394,
+                    6.80827233591117
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[26]",
+            "fullname": "f64.py::test[26]",
+            "params": {
+                "nqubits": 26
+            },
+            "param": "26",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 10.985886372160167,
+                "max": 11.671641419874504,
+                "mean": 11.264635520987213,
+                "stddev": 0.27498399734949003,
+                "rounds": 5,
+                "median": 11.170927861938253,
+                "iqr": 0.40797302016289905,
+                "q1": 11.063725195534062,
+                "q3": 11.47169821569696,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 10.985886372160167,
+                "hd15iqr": 11.671641419874504,
+                "ops": 0.08877340044752391,
+                "total": 56.32317760493606,
+                "data": [
+                    11.405050480971113,
+                    11.671641419874504,
+                    11.089671469992027,
+                    11.170927861938253,
+                    10.985886372160167
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "circuit",
+            "name": "test[27]",
+            "fullname": "f64.py::test[27]",
+            "params": {
+                "nqubits": 27
+            },
+            "param": "27",
+            "extra_info": {
+                "niter": 10
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 17.062953743850812,
+                "max": 19.193899828009307,
+                "mean": 17.941193755948916,
+                "stddev": 0.8605154551707926,
+                "rounds": 5,
+                "median": 17.51004532095976,
+                "iqr": 1.2313839270500466,
+                "q1": 17.393565940554254,
+                "q3": 18.6249498676043,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 17.062953743850812,
+                "hd15iqr": 19.193899828009307,
+                "ops": 0.05573765121779711,
+                "total": 89.70596877974458,
+                "data": [
+                    18.43529988080263,
+                    17.503770006122068,
+                    17.062953743850812,
+                    17.51004532095976,
+                    19.193899828009307
+                ],
+                "iterations": 1
+            }
+        }
+    ],
+    "datetime": "2026-06-02T03:02:03.726295+00:00",
+    "version": "5.2.3"
+}
