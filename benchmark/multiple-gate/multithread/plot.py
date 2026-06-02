@@ -40,7 +40,7 @@ def load():
             # results that did not record it); each layer = nqubits * 3 gates
             # (CX, RX, RZ) -> normalize to milliseconds per single gate.
             niter = item.get("extra_info", {}).get("niter", 100)
-            dat[group][name][nqubits] = item["stats"]["min"] / (nqubits * niter * 3) * 1000
+            dat[group][name][nqubits] = item["stats"]["median"] / (nqubits * niter * 3) * 1000
     return dat
 
 
