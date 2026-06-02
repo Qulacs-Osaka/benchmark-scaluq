@@ -1,3 +1,4 @@
+import os
 import pytest
 import random
 import math
@@ -6,6 +7,10 @@ from qiskit_aer import AerSimulator
 from qiskit.compiler import transpile
 
 nqubits_list = list(range(4, 28))
+
+# Match the thread count used by the OpenMP-based libraries (set via
+# OMP_NUM_THREADS in exec.sh); 0 lets Aer use all cores.
+max_parallel_threads = int(os.environ.get("OMP_NUM_THREADS", "0"))
 
 # Number of times the layer is repeated inside a single circuit / run(). Putting
 # the repetitions into one circuit and running it once means the
@@ -26,11 +31,14 @@ def transpile_on_cpu(qc):
         max_job_size=1,
         max_parallel_experiments=1,
         max_parallel_shots=1,
-        # default threshold is 14 (<=14 qubits run single-threaded, which shows
-        # up as a step between 14 and 15 qubits). Aer treats 0 as "auto" and
-        # falls back to 14, so set it to 1: gate application is OpenMP-parallel
-        # at every qubit count, matching Scaluq's always-on OpenMP.
-        statevector_parallel_threshold=1,
+        max_parallel_threads=max_parallel_threads,
+        # NOTE: Aer's default statevector_parallel_threshold=14 makes <=14 qubits
+        # run single-threaded (very fast here, ~0.02 ms/gate) and >=15 qubits run
+        # multi-threaded (~9 ms/gate, dominated by OpenMP fork/join overhead on a
+        # high-core machine), producing a step between 14 and 15 qubits. Forcing
+        # it on (threshold=1) removes the step but makes <=14 qubits ~200x slower,
+        # so the threading policy is better controlled via OMP_NUM_THREADS (see
+        # exec.sh) than by forcing this threshold.
     )
     return backend, transpile(qc, backend, optimization_level=0)
 

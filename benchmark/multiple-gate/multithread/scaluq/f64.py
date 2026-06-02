@@ -7,17 +7,13 @@ import scaluq.default.f64.gate as mgate
 
 nqubits_list = list(range(4, 28))
 
-def niter_for(nqubits):
-    # Repeat the layer many times for cheap small states and few times for
-    # expensive large states, keeping each timed call's total work roughly
-    # bounded. Many repeats at small nqubits amortize the fixed per-call cost
-    # (synchronize(), the Python loop), so the per-gate value stays stable and
-    # matches the original measurement; few repeats at large nqubits keep the
-    # sweep fast. plot.py divides by the recorded niter, so the per-gate value
-    # is unchanged by this choice.
-    return max(1, min(100, 2 ** max(0, 18 - nqubits)))
+# On this environment the per-gate time is dominated by Scaluq's per-gate OpenMP
+# fork/join overhead (~ms, roughly constant across qubit counts), so the
+# measured per-gate value is independent of niter. Keep niter small: a larger
+# value only multiplies the wall-clock time without changing the result.
+niter = 10
 
-def benchfunc(circuit, state, niter):
+def benchfunc(circuit, state):
     for _ in range(niter):
         circuit.update_quantum_state(state, {})
     scaluqbase.synchronize()
@@ -26,7 +22,6 @@ def benchfunc(circuit, state, niter):
 def test(benchmark, nqubits):
     random.seed(nqubits)
     benchmark.group = 'circuit'
-    niter = niter_for(nqubits)
     benchmark.extra_info["niter"] = niter
     circuit = scaluq.Circuit()
     for i in range(nqubits):
@@ -34,5 +29,5 @@ def test(benchmark, nqubits):
         circuit.add_gate(mgate.RX(i, random.uniform(0, math.pi * 2)))
         circuit.add_gate(mgate.RZ(i, random.uniform(0, math.pi * 2)))
     state = scaluq.StateVector(nqubits)
-    benchfunc(circuit, state, niter)  # warmup
-    benchmark(benchfunc, circuit, state, niter)
+    benchfunc(circuit, state)  # warmup
+    benchmark(benchfunc, circuit, state)
