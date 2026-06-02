@@ -37,12 +37,14 @@ def load():
             group = item["group"]
             nqubits = int(item["params"]["nqubits"])
             stats = item["stats"]
-            dat1[group][name][nqubits] = stats["mean"]
+            dat1[group][name][nqubits] = stats["min"]
     dat = defaultdict(lambda: defaultdict(dict))
     for group in dat1:
         for name in dat1[group]:
             for nqubits in dat1[group][name]:
-                dat[group][name][nqubits] = dat1[group][name][nqubits] / (nqubits * 100) * 1000
+                # benchfunc applies 100 layers, each layer = nqubits * 3 gates
+                # (CX, RX, RZ) -> normalize to milliseconds per single gate.
+                dat[group][name][nqubits] = dat1[group][name][nqubits] / (nqubits * 100 * 3) * 1000
     return dat
 
 
@@ -75,7 +77,7 @@ def plot(dat, group):
     plt.grid(which='major', color='black', linestyle='-', alpha=0.3)
     plt.grid(which='minor', color='black', linestyle='-', alpha=0.1)
     plt.xlabel("Number of qubits", fontsize=16)
-    plt.ylabel("Execution time per iteration [ms]", fontsize=16)
+    plt.ylabel("Execution time per gate [ms]", fontsize=16)
     plt.xticks(fontsize=16)
     plt.yticks(fontsize=16)
 

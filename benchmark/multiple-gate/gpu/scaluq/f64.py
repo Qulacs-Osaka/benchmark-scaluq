@@ -14,6 +14,7 @@ def benchfunc(circuit, state):
 
 @pytest.mark.parametrize("nqubits", nqubits_list)
 def test(benchmark, nqubits):
+    random.seed(nqubits)
     benchmark.group = 'circuit'
     circuit = scaluq.Circuit(nqubits)
     for i in range(nqubits):
@@ -21,4 +22,5 @@ def test(benchmark, nqubits):
         circuit.add_gate(mgate.RX(i, random.uniform(0, math.pi * 2)))
         circuit.add_gate(mgate.RZ(i, random.uniform(0, math.pi * 2)))
     state = scaluq.StateVector(nqubits)
+    benchfunc(circuit, state)  # warmup
     benchmark(benchfunc, circuit, state)
