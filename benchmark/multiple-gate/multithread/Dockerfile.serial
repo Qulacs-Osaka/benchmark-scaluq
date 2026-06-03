@@ -1,0 +1,54 @@
+# Image for the SINGLE-THREAD benchmark (execall_st.sh).
+#
+# Goal: every library runs genuinely serial, with NO OpenMP-runtime per-region
+# overhead, so the comparison is fair against Scaluq's Kokkos::Serial backend
+# (scaluq.host_serial, selected in f64.py when OMP_NUM_THREADS=1).
+#
+#   - Scaluq:     host_serial (Kokkos::Serial) backend -> no OpenMP. Same install
+#                 as the multi image; the backend is chosen at runtime in f64.py.
+#   - Qiskit-Aer: NO rebuild needed. Its gate loop is guarded by
+#                 `if (omp_threads > 1) { #pragma omp parallel } else { serial }`,
+#                 so max_parallel_threads=1 (set via OMP_NUM_THREADS=1 in
+#                 exec_st.sh) takes a genuinely serial path with no fork/join.
+#   - Qulacs:     MUST be rebuilt with USE_OMP=No, because its kernels use an
+#                 unconditional `#pragma omp parallel for`; OMP_NUM_THREADS=1
+#                 alone still enters the parallel region. USE_OMP=No compiles the
+#                 OpenMP code out entirely (#ifdef _OPENMP). <-- only difference
+#                 from the multi-thread Dockerfile.
+#
+# The multi-thread sweep (execall.sh) must still use the regular Dockerfile,
+# where Qulacs is built WITH OpenMP. Build both images from the same library
+# versions so only the threading differs.
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update
+RUN apt-get install -y \
+    ca-certificates \
+    curl \
+    git \
+    wget
+
+# install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+RUN uv python install 3.12 --default
+
+# install pytest-benchmark
+RUN uv run python -m pip install --break-system-packages pytest-benchmark
+
+# install qulacs WITHOUT OpenMP (single-thread build): USE_OMP=No removes the
+# OpenMP code paths entirely so there is no per-gate parallel-region overhead.
+RUN git clone https://github.com/qulacs/qulacs --depth=1 /tmp/qulacs
+RUN apt-get update
+RUN apt-get install -y \
+    build-essential \
+    cmake \
+    libboost-dev
+RUN cd /tmp/qulacs && \
+    USE_OMP=No uv run --no-project python -m pip install --break-system-packages .
+RUN rm -r /tmp/qulacs
+
+
+RUN uv run python -m pip install --break-system-packages matplotlib
