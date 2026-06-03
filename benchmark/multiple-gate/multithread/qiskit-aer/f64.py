@@ -6,7 +6,8 @@ from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from qiskit.compiler import transpile
 
-nqubits_list = list(range(4, 28))
+# Upper qubit count (inclusive); lowered to 18 by the single-thread run.
+nqubits_list = list(range(4, int(os.environ.get("NQUBITS_MAX", "27")) + 1))
 
 # Match the thread count used by the OpenMP-based libraries (set via
 # OMP_NUM_THREADS in exec.sh); 0 lets Aer use all cores.

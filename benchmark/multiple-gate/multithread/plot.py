@@ -25,6 +25,8 @@ def load():
             if only_f64:
                 if prec == 'f64':
                     filepaths.append((f'{libname}', filepath))
+                elif prec == 'f64_st':
+                    filepaths.append((f'{libname} (1 thread)', filepath))
             else:
                 filepaths.append((f'{libname} ({prec})', filepath))
 
@@ -63,6 +65,8 @@ def plot(dat, group):
             if name.count('(bf16)'):
                 linestyle = 'dotted'
             if name.count('(cuStateVec)'):
+                linestyle = 'dashed'
+            if name.count('(1 thread)'):
                 linestyle = 'dashed'
         else:
             cid = libnames.index(name)

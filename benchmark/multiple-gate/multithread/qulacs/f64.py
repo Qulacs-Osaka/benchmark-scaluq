@@ -1,10 +1,12 @@
+import os
 import pytest
 import random
 import math
 import qulacs
 import qulacs.gate as mgate
 
-nqubits_list = list(range(4, 28))
+# Upper qubit count (inclusive); lowered to 18 by the single-thread run.
+nqubits_list = list(range(4, int(os.environ.get("NQUBITS_MAX", "27")) + 1))
 
 # See multithread/scaluq/f64.py: per-gate time is OpenMP-overhead bound and
 # independent of niter, so keep niter small to avoid inflating wall-clock time.
