@@ -33,13 +33,15 @@ def transpile_on_cpu(qc):
         max_parallel_experiments=1,
         max_parallel_shots=1,
         max_parallel_threads=max_parallel_threads,
-        # NOTE: Aer's default statevector_parallel_threshold=14 makes <=14 qubits
-        # run single-threaded (very fast here, ~0.02 ms/gate) and >=15 qubits run
-        # multi-threaded (~9 ms/gate, dominated by OpenMP fork/join overhead on a
-        # high-core machine), producing a step between 14 and 15 qubits. Forcing
-        # it on (threshold=1) removes the step but makes <=14 qubits ~200x slower,
-        # so the threading policy is better controlled via OMP_NUM_THREADS (see
-        # exec.sh) than by forcing this threshold.
+        # Force OpenMP gate application at every qubit count, matching Scaluq's
+        # and Qulacs' always-on parallelism (Aer's default threshold of 14 would
+        # otherwise run <=14 qubits single-threaded, creating a step at 14/15).
+        # In the single-thread run OMP_NUM_THREADS=1 -> max_parallel_threads=1,
+        # so this stays effectively serial there. (This was briefly removed
+        # because, when oversubscribing 64 hyperthreads, forced parallelism made
+        # small circuits ~200x slower; pinning OMP_NUM_THREADS to 32 physical
+        # cores removed that pathology, so it is cheap again.)
+        statevector_parallel_threshold=1,
     )
     return backend, transpile(qc, backend, optimization_level=0)
 
