@@ -22,7 +22,7 @@ niter = 10
 
 def benchfunc(circuit, state):
     for _ in range(niter):
-        circuit.update_quantum_state(state, {})
+        circuit.update_quantum_state(state, {}, 0)
     scaluqbase.synchronize()
 
 @pytest.mark.parametrize("nqubits", nqubits_list)
