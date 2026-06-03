@@ -1,7 +1,7 @@
 # Single-thread run: OpenMP fork/join overhead dominates small states in the
 # multi-thread run, so also measure single-thread performance for n <= 18.
 export OMP_NUM_THREADS=1
-export NQUBITS_MAX="${NQUBITS_MAX:-18}"
+export NQUBITS_MAX="${NQUBITS_MAX:-22}"
 
 rm -f "${1}_st.json"
 # Output goes to a log file so a dropped SSH / detached session can't kill the

@@ -3,7 +3,11 @@ import pytest
 import random
 import math
 import scaluq as scaluqbase
-import scaluq.default.f64 as scaluq
+if os.environ.get("OMP_NUM_THREADS", "32") == "1":
+    from scaluq.host_serial.f64 import StateVector
+else:
+    from scaluq.default.f64 import StateVector
+from scaluq.default.f64 import Circuit
 import scaluq.default.f64.gate as mgate
 
 # Upper qubit count (inclusive). The single-thread run (exec_st.sh) lowers this
@@ -26,11 +30,11 @@ def test(benchmark, nqubits):
     random.seed(nqubits)
     benchmark.group = 'circuit'
     benchmark.extra_info["niter"] = niter
-    circuit = scaluq.Circuit()
+    circuit = Circuit()
     for i in range(nqubits):
         circuit.add_gate(mgate.CX(i, (i+1) % nqubits))
         circuit.add_gate(mgate.RX(i, random.uniform(0, math.pi * 2)))
         circuit.add_gate(mgate.RZ(i, random.uniform(0, math.pi * 2)))
-    state = scaluq.StateVector(nqubits)
+    state = StateVector(nqubits)
     benchfunc(circuit, state)  # warmup
     benchmark(benchfunc, circuit, state)
