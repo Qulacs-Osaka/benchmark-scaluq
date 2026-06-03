@@ -1,13 +1,14 @@
 import json
 import glob
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from collections import defaultdict
 import os
 
 #libs = ["scaluq", "qulacs", "qiskit-aer", "qiskit-aer-custatevec", "custatevec"]
 #libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Qiskit-Aer with cuStateVec", "cuStateVec"]
 libs = ["scaluq", "qulacs", "custatevec", "qiskit-aer"]
-libnames = ["Proposal", "Qulacs", "cuStateVec", "Qiskit-Aer"]
+libnames = ["Scaluq", "Qulacs", "cuStateVec", "Qiskit-Aer"]
 markers = ['P', 'o', '^', 's', 'D']
 colors = ['tab:red', 'tab:blue', 'tab:gray', "tab:green", "tab:purple"]
 only_f64 = True
@@ -70,7 +71,10 @@ def plot(dat, group):
                 linestyle = 'dashed'
         else:
             cid = libnames.index(name)
-        plt.plot(xs, ys, label=name, c=colors[cid], linestyle=linestyle, marker=markers[cid])
+        # Only the multi-thread (solid) curves go in the legend; the dashed
+        # single-thread curves are explained by a separate line-style legend.
+        label = '_nolegend_' if name.count('(1 thread)') else name
+        plt.plot(xs, ys, label=label, c=colors[cid], linestyle=linestyle, marker=markers[cid])
 
     #plt.title(f"{group} Gate apply@Nvidia A100 40 GB")
     plt.yscale("log")
@@ -89,9 +93,17 @@ if __name__ == "__main__":
 
     for group in dat.keys():
         plt.rcParams["font.size"] = 18
-        plt.figure(figsize=(7, 5))
+        plt.figure(figsize=(8, 6))
         plot(dat, group)
-        plt.legend(fontsize=18)
+        # Library legend (multi-thread / solid curves only), top-left corner.
+        lib_legend = plt.legend(fontsize=15, loc='upper left')
+        plt.gca().add_artist(lib_legend)
+        # Separate legend explaining the line styles, bottom-right corner.
+        style_handles = [
+            Line2D([0], [0], color='black', linestyle='solid', label='32 threads'),
+            Line2D([0], [0], color='black', linestyle='dashed', label='1 thread'),
+        ]
+        plt.legend(handles=style_handles, fontsize=14, loc='lower right')
         plt.tight_layout()
         #plt.savefig(f"./image/{group}.pdf")
         plt.savefig(f"./image/{group}.png", dpi=300)
