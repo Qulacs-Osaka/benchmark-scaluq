@@ -18,11 +18,14 @@ def init_state(nqubits):
 
 nqubits_list = list(range(4, 28))
 
+# Repetitions per timed call (recorded so plot.py normalizes per gate).
+niter = 100
+
 handle = custatevec.create()
 atexit.register(lambda: custatevec.destroy(handle))
 
 def benchfunc(nqubits, state, xgate, rxthetas, rzthetas, exptr, exsz):
-    for _ in range(100):
+    for _ in range(niter):
         for i in range(nqubits):
             # CX(control=i, target=(i+1)%n): controlled dense X matrix
             custatevec.apply_matrix(handle, state, dtype_cuquantum, nqubits, xgate, dtype_cuquantum, custatevec.MatrixLayout.ROW, 0, [(i+1) % nqubits], 1, [i], [1], 1, compute_type, exptr, exsz)
@@ -36,6 +39,7 @@ def benchfunc(nqubits, state, xgate, rxthetas, rzthetas, exptr, exsz):
 def test(benchmark, nqubits):
     random.seed(nqubits)
     benchmark.group = 'circuit'
+    benchmark.extra_info["niter"] = niter
     state = init_state(nqubits)
     xgate_lst = [[0, 1], [1, 0]]
     xgate = cp.array(xgate_lst, dtype=dtype)
