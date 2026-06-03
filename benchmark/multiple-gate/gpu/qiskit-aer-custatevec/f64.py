@@ -26,6 +26,7 @@ def benchfunc(backend, qc):
 def test(benchmark, nqubits):
     random.seed(nqubits)
     benchmark.group = 'circuit'
+    benchmark.extra_info["niter"] = nlayers
     rxthetas = [random.uniform(0, math.pi * 2) for _ in range(nqubits)]
     rzthetas = [random.uniform(0, math.pi * 2) for _ in range(nqubits)]
     qc = QuantumCircuit(nqubits)
