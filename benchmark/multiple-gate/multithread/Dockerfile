@@ -58,4 +58,10 @@ RUN cd /tmp/scaluq && \
     SCALUQ_USE_TEST=OFF SCALUQ_USE_EXE=OFF uv run --no-project python -m pip install --break-system-packages .
 RUN rm -r /tmp/scaluq
 
+# install PennyLane + Lightning (lightning.qubit) and Lightning-Kokkos
+# (lightning.kokkos). The PyPI x86_64 wheels are prebuilt with the OpenMP
+# backend (no source build needed), and both honor OMP_NUM_THREADS.
+RUN uv run python -m pip install --break-system-packages \
+    pennylane pennylane-lightning pennylane-lightning-kokkos
+
 RUN uv run python -m pip install --break-system-packages matplotlib

@@ -18,3 +18,9 @@ cd -
 cd qiskit-aer/
 ./exec.sh f64
 cd -
+cd pennylane-lightning/
+./exec.sh f64
+cd -
+cd pennylane-lightning-kokkos/
+./exec.sh f64
+cd -
