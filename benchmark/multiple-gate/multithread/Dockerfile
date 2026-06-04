@@ -47,7 +47,8 @@ RUN cd /tmp/qulacs && \
 RUN rm -r /tmp/qulacs
 
 # install scaluq
-RUN git clone https://github.com/qulacs/scaluq --depth=1 /tmp/scaluq
+RUN git clone https://github.com/qulacs/scaluq /tmp/scaluq
+RUN git -C /tmp/scaluq switch do-not-call-random_device-when-it-has-seed
 RUN apt-get update
 RUN apt-get install -y \
     build-essential \
