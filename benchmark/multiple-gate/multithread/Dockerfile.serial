@@ -13,8 +13,10 @@
 #   - Qulacs:     MUST be rebuilt with USE_OMP=No, because its kernels use an
 #                 unconditional `#pragma omp parallel for`; OMP_NUM_THREADS=1
 #                 alone still enters the parallel region. USE_OMP=No compiles the
-#                 OpenMP code out entirely (#ifdef _OPENMP). <-- only difference
-#                 from the multi-thread Dockerfile.
+#                 OpenMP code out entirely (#ifdef _OPENMP).
+#   - PennyLane:  the PyPI wheels are OpenMP, so build from source single-thread:
+#                 lightning.qubit with -DENABLE_OPENMP=OFF, lightning.kokkos with
+#                 the Kokkos Serial backend (no OpenMP).
 #
 # The multi-thread sweep (execall.sh) must still use the regular Dockerfile,
 # where Qulacs is built WITH OpenMP. Build both images from the same library
@@ -50,5 +52,28 @@ RUN cd /tmp/qulacs && \
     USE_OMP=No uv run --no-project python -m pip install --break-system-packages .
 RUN rm -r /tmp/qulacs
 
+# install PennyLane Lightning as TRUE single-thread builds (no OpenMP), to match
+# Scaluq host_serial / Qulacs USE_OMP=No. The PyPI wheels are OpenMP, so build
+# from the monorepo source. lightning.qubit: -DENABLE_OPENMP=OFF. lightning.kokkos:
+# Kokkos Serial backend (no OpenMP/CUDA). lightning_qubit is the base package and
+# must be installed before lightning_kokkos. The monorepo selects the backend via
+# PL_BACKEND + scripts/configure_pyproject_toml.py; setup.py reads CMAKE_ARGS.
+# (Do NOT install libomp-dev; keep no Kokkos preinstalled so Serial is built.)
+RUN apt-get update
+RUN apt-get install -y \
+    build-essential \
+    cmake \
+    ninja-build
+RUN uv run python -m pip install --break-system-packages tomlkit
+RUN git clone --depth=1 https://github.com/PennyLaneAI/pennylane-lightning.git /tmp/pl
+RUN cd /tmp/pl && \
+    PL_BACKEND="lightning_qubit" uv run --no-project python scripts/configure_pyproject_toml.py && \
+    CMAKE_ARGS="-DENABLE_OPENMP=OFF -DLQ_ENABLE_KERNEL_OMP=OFF" \
+        uv run --no-project python -m pip install --break-system-packages .
+RUN cd /tmp/pl && \
+    PL_BACKEND="lightning_kokkos" uv run --no-project python scripts/configure_pyproject_toml.py && \
+    CMAKE_ARGS="-DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=OFF -DKokkos_ENABLE_CUDA=OFF -DKokkos_ENABLE_THREADS=OFF -DENABLE_OPENMP=OFF" \
+        uv run --no-project python -m pip install --break-system-packages .
+RUN rm -r /tmp/pl
 
 RUN uv run python -m pip install --break-system-packages matplotlib
