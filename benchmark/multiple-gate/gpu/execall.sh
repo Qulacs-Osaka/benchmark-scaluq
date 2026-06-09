@@ -14,3 +14,9 @@ cd -
 cd custatevec/
 ./exec.sh f64
 cd -
+cd pennylane-lightning-gpu/
+./exec.sh f64
+cd -
+cd pennylane-lightning-kokkos/
+./exec.sh f64
+cd -

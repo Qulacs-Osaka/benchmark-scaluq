@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG QISKIT_AER_COMMIT=837c3ef3c39248aae936580360c22224dcefb265
 ARG QULACS_COMMIT=4f6de32cca807ec4cabf1107e3806786cb953c56
 ARG SCALUQ_COMMIT=025565d2fef0ce260692d61d08b21bf1f7491ffd
+ARG PENNYLANE_VERSION=0.45.0
 # GPU-only pip packages: pin after the run once the resolved versions are known.
 
 RUN apt-get update
@@ -81,7 +82,28 @@ RUN rm -r /tmp/scaluq
 
 # install custatevec
 RUN uv run --no-project python -m pip install --break-system-packages cupy-cuda12x cuquantum-python-cu12 custatevec-cu12
-# 
+
+# install PennyLane GPU devices: lightning.kokkos (Kokkos CUDA backend, built
+# from source for A100/sm_80) and lightning.gpu (cuStateVec, prebuilt wheel).
+RUN uv run python -m pip install --break-system-packages build cmake ninja tomlkit "pennylane==${PENNYLANE_VERSION}"
+RUN git clone --depth=1 --branch "v${PENNYLANE_VERSION}" \
+    https://github.com/PennyLaneAI/pennylane-lightning.git /tmp/pl
+# base package (compilation skipped) — prerequisite for the lightning_kokkos build
+RUN cd /tmp/pl && \
+    PL_BACKEND="lightning_qubit" uv run --no-project python scripts/configure_pyproject_toml.py && \
+    SKIP_COMPILATION=True uv run --no-project python -m pip install --break-system-packages .
+# lightning.kokkos with the Kokkos CUDA backend (A100 = AMPERE80); needs no cuQuantum
+RUN cd /tmp/pl && \
+    PL_BACKEND="lightning_kokkos" uv run --no-project python scripts/configure_pyproject_toml.py && \
+    CMAKE_ARGS="-DKokkos_ENABLE_CUDA=ON -DKokkos_ARCH_AMPERE80=ON -DKokkos_ENABLE_SERIAL=ON -DCMAKE_CXX_STANDARD=20" \
+        uv run --no-project python -m pip install --break-system-packages .
+RUN rm -r /tmp/pl
+# restore the compiled lightning.qubit base (the step above skipped compilation),
+# then add lightning.gpu (cuStateVec) from its prebuilt wheel
+RUN uv run python -m pip install --break-system-packages --force-reinstall --no-deps \
+    "pennylane-lightning==${PENNYLANE_VERSION}"
+RUN uv run python -m pip install --break-system-packages "pennylane-lightning-gpu==${PENNYLANE_VERSION}"
+#
 # # install QuEST
 # RUN git clone https://github.com/rrmeister/pyquest -b develop --depth=1 --recursive /tmp/pyquest
 # RUN cd /tmp/pyquest && \
