@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # versions are compared on CPU and GPU (override with --build-arg to bump).
 ARG QISKIT_AER_COMMIT=837c3ef3c39248aae936580360c22224dcefb265
 ARG QULACS_COMMIT=4f6de32cca807ec4cabf1107e3806786cb953c56
-ARG SCALUQ_COMMIT=0a8d36af4ed7ff9b6b63955bcdf4220e0aaf7a3a
+ARG SCALUQ_COMMIT=025565d2fef0ce260692d61d08b21bf1f7491ffd
 # GPU-only pip packages: pin after the run once the resolved versions are known.
 
 RUN apt-get update
