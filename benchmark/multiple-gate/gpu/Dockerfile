@@ -2,6 +2,13 @@ FROM nvidia/cuda:12.6.3-devel-ubuntu24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Pinned versions, matching the CPU (multithread) Dockerfile so the same library
+# versions are compared on CPU and GPU (override with --build-arg to bump).
+ARG QISKIT_AER_COMMIT=837c3ef3c39248aae936580360c22224dcefb265
+ARG QULACS_COMMIT=4f6de32cca807ec4cabf1107e3806786cb953c56
+ARG SCALUQ_COMMIT=0a8d36af4ed7ff9b6b63955bcdf4220e0aaf7a3a
+# GPU-only pip packages: pin after the run once the resolved versions are known.
+
 RUN apt-get update
 RUN apt-get install -y \
     ca-certificates \
@@ -40,7 +47,8 @@ RUN apt-get install -y \
     libopenblas-dev \
     zlib1g-dev
 RUN uv run python -m pip install cmake "conan<2.0.0" scikit-build pybind11 --break-system-packages
-RUN git clone https://github.com/qiskit/qiskit-aer --depth=1 /tmp/qiskit-aer
+RUN git clone https://github.com/qiskit/qiskit-aer /tmp/qiskit-aer
+RUN git -C /tmp/qiskit-aer checkout "${QISKIT_AER_COMMIT}"
 RUN cd /tmp/qiskit-aer && \
     uv run --no-project python setup.py bdist_wheel -- -DAER_THRUST_BACKEND=CUDA -DAER_CUDA_ARCH="8.0" -DCUQUANTUM_ROOT="/opt/nvidia/cuquantum" -DCUTENSOR_ROOT="/opt/nvidia/cutensor" -DAER_ENABLE_CUQUANTUM=true && \
     uv run --no-project python -m pip install --break-system-packages dist/*.whl --no-build-isolation
@@ -48,7 +56,8 @@ RUN uv run python -m pip uninstall --break-system-packages -y cmake
 RUN rm -r /tmp/qiskit-aer
 
 # install qulacs
-RUN git clone https://github.com/qulacs/qulacs --depth=1 /tmp/qulacs
+RUN git clone https://github.com/qulacs/qulacs /tmp/qulacs
+RUN git -C /tmp/qulacs checkout "${QULACS_COMMIT}"
 RUN apt-get update
 RUN apt-get install -y \
     build-essential \
@@ -59,7 +68,8 @@ RUN cd /tmp/qulacs && \
 RUN rm -r /tmp/qulacs
 
 # install scaluq
-RUN git clone https://github.com/qulacs/scaluq --depth=1 /tmp/scaluq
+RUN git clone https://github.com/qulacs/scaluq /tmp/scaluq
+RUN git -C /tmp/scaluq checkout "${SCALUQ_COMMIT}"
 RUN apt-get update
 RUN apt-get install -y \
     build-essential \

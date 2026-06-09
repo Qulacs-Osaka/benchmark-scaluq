@@ -13,7 +13,9 @@ niter = 100
 
 def benchfunc(circuit, state):
     for _ in range(niter):
-        circuit.update_quantum_state(state, {})
+        # pass a fixed seed (3rd arg) so the default std::random_device read is
+        # avoided each call (requires the seed handling fix in scaluq 0a8d36a)
+        circuit.update_quantum_state(state, {}, 0)
     scaluqbase.synchronize()
 
 @pytest.mark.parametrize("nqubits", nqubits_list)

@@ -47,28 +47,17 @@ def load():
 def plot(dat, group):
     assert len(group) > 0
     dat_group = dat[group]
-    cmap = plt.get_cmap("tab10")
-    for name in dat_group:
+    names = list(dat_group.keys())
+    names.sort(key=lambda n: n == "Scaluq")  # draw Scaluq last so it sits on top
+    for name in names:
+        cid = libnames.index(name)
         xs = list(sorted(dat_group[name].keys()))
         ys = [dat_group[name][x] for x in xs]
-        linestyle = 'solid'
-        if name.count('('):
-            cid = libnames.index(name[:name.index(' (')])
-            if name.count('(f64)'):
-                linestyle = 'solid'
-            if name.count('(f32)'):
-                linestyle = 'dashed'
-            if name.count('(f16)'):
-                linestyle = 'dashdot'
-            if name.count('(bf16)'):
-                linestyle = 'dotted'
-            if name.count('(cuStateVec)'):
-                linestyle = 'dashed'
-        else:
-            cid = libnames.index(name)
-        plt.plot(xs, ys, label=name, c=colors[cid], linestyle=linestyle, marker=markers[cid])
+        # all libraries drawn uniformly; Scaluq only placed on top (zorder)
+        plt.plot(xs, ys, label=name, c=colors[cid], marker=markers[cid],
+                 linewidth=1.6, markersize=6,
+                 zorder=5 if name == "Scaluq" else 3)
 
-    #plt.title(f"{group} Gate apply@Nvidia A100 40 GB")
     plt.yscale("log")
     plt.grid(which='major', color='black', linestyle='-', alpha=0.3)
     plt.grid(which='minor', color='black', linestyle='-', alpha=0.1)
@@ -78,8 +67,6 @@ def plot(dat, group):
     plt.yticks(fontsize=16)
 
 
-
-
 if __name__ == "__main__":
     dat = load()
 
@@ -87,9 +74,9 @@ if __name__ == "__main__":
         plt.rcParams["font.size"] = 18
         plt.figure(figsize=(7, 5))
         plot(dat, group)
-        plt.legend(fontsize=18)
+        plt.legend(fontsize=14, loc='upper left')
         plt.tight_layout()
-        #plt.savefig(f"./image/{group}.pdf")
-        plt.savefig(f"./image/{group}.png", dpi=300)
+        #plt.savefig(f"./image/{group}_gpu.pdf")
+        plt.savefig(f"./image/{group}_gpu.png", dpi=300)
         plt.clf()
 
