@@ -65,10 +65,9 @@ def plot(dat, group, single):
         cid = libnames.index(base)
         xs = list(sorted(dat_group[name].keys()))
         ys = [dat_group[name][x] for x in xs]
-        emph = base == "Scaluq"  # highlight the proposed library
+        emph = base == "Scaluq"  # draw the proposed library on top, same weight
         plt.plot(xs, ys, label=base, c=colors[cid], marker=markers[cid],
-                 linewidth=3.0 if emph else 1.3,
-                 markersize=9 if emph else 5,
+                 linewidth=1.6, markersize=6,
                  zorder=5 if emph else 3)
 
     plt.yscale("log")
