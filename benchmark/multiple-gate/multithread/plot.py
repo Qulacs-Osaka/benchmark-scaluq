@@ -47,36 +47,30 @@ def load():
     return dat
 
 
-def plot(dat, group):
-    assert len(group) > 0
+def _base_name(name):
+    # "Scaluq (1 thread)" -> "Scaluq"; "Scaluq" -> "Scaluq"
+    suffix = ' (1 thread)'
+    return name[:-len(suffix)] if name.endswith(suffix) else name
+
+
+def plot(dat, group, single):
+    # single=False -> multi-thread curves (names without "(1 thread)")
+    # single=True  -> single-thread curves (names with    "(1 thread)")
     dat_group = dat[group]
-    cmap = plt.get_cmap("tab10")
-    for name in dat_group:
+    names = [n for n in dat_group if n.endswith(' (1 thread)') == single]
+    # draw Scaluq last so its (emphasized) curve sits on top
+    names.sort(key=lambda n: _base_name(n) == "Scaluq")
+    for name in names:
+        base = _base_name(name)
+        cid = libnames.index(base)
         xs = list(sorted(dat_group[name].keys()))
         ys = [dat_group[name][x] for x in xs]
-        linestyle = 'solid'
-        if name.count('('):
-            cid = libnames.index(name[:name.index(' (')])
-            if name.count('(f64)'):
-                linestyle = 'solid'
-            if name.count('(f32)'):
-                linestyle = 'dashed'
-            if name.count('(f16)'):
-                linestyle = 'dashdot'
-            if name.count('(bf16)'):
-                linestyle = 'dotted'
-            if name.count('(cuStateVec)'):
-                linestyle = 'dashed'
-            if name.count('(1 thread)'):
-                linestyle = 'dashed'
-        else:
-            cid = libnames.index(name)
-        # Only the multi-thread (solid) curves go in the legend; the dashed
-        # single-thread curves are explained by a separate line-style legend.
-        label = '_nolegend_' if name.count('(1 thread)') else name
-        plt.plot(xs, ys, label=label, c=colors[cid], linestyle=linestyle, marker=markers[cid])
+        emph = base == "Scaluq"  # highlight the proposed library
+        plt.plot(xs, ys, label=base, c=colors[cid], marker=markers[cid],
+                 linewidth=3.0 if emph else 1.3,
+                 markersize=9 if emph else 5,
+                 zorder=5 if emph else 3)
 
-    #plt.title(f"{group} Gate apply@Nvidia A100 40 GB")
     plt.yscale("log")
     plt.grid(which='major', color='black', linestyle='-', alpha=0.3)
     plt.grid(which='minor', color='black', linestyle='-', alpha=0.1)
@@ -86,26 +80,17 @@ def plot(dat, group):
     plt.yticks(fontsize=16)
 
 
-
-
 if __name__ == "__main__":
     dat = load()
 
     for group in dat.keys():
-        plt.rcParams["font.size"] = 18
-        plt.figure(figsize=(8, 6))
-        plot(dat, group)
-        # Library legend (multi-thread / solid curves only), top-left corner.
-        lib_legend = plt.legend(fontsize=15, loc='upper left')
-        plt.gca().add_artist(lib_legend)
-        # Separate legend explaining the line styles, bottom-right corner.
-        style_handles = [
-            Line2D([0], [0], color='black', linestyle='solid', label='32 threads'),
-            Line2D([0], [0], color='black', linestyle='dashed', label='1 thread'),
-        ]
-        plt.legend(handles=style_handles, fontsize=14, loc='lower right')
-        plt.tight_layout()
-        #plt.savefig(f"./image/{group}.pdf")
-        plt.savefig(f"./image/{group}.png", dpi=300)
-        plt.clf()
+        for single, suffix in [(False, "multithread"), (True, "singlethread")]:
+            plt.rcParams["font.size"] = 18
+            plt.figure(figsize=(7, 5))
+            plot(dat, group, single)
+            plt.legend(fontsize=14, loc='upper left')
+            plt.tight_layout()
+            #plt.savefig(f"./image/{group}_{suffix}.pdf")
+            plt.savefig(f"./image/{group}_{suffix}.png", dpi=300)
+            plt.clf()
 

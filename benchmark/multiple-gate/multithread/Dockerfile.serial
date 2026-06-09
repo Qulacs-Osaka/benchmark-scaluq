@@ -26,6 +26,11 @@ FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Pinned versions, matching the multi-thread Dockerfile so only the threading
+# (OpenMP on/off) differs (override with --build-arg to bump).
+ARG QULACS_COMMIT=4f6de32cca807ec4cabf1107e3806786cb953c56
+ARG PENNYLANE_VERSION=0.45.0
+
 RUN apt-get update
 RUN apt-get install -y \
     ca-certificates \
@@ -42,7 +47,8 @@ RUN uv run python -m pip install --break-system-packages pytest-benchmark
 
 # install qulacs WITHOUT OpenMP (single-thread build): USE_OMP=No removes the
 # OpenMP code paths entirely so there is no per-gate parallel-region overhead.
-RUN git clone https://github.com/qulacs/qulacs --depth=1 /tmp/qulacs
+RUN git clone https://github.com/qulacs/qulacs /tmp/qulacs
+RUN git -C /tmp/qulacs checkout "${QULACS_COMMIT}"
 RUN apt-get update
 RUN apt-get install -y \
     build-essential \
@@ -65,7 +71,8 @@ RUN apt-get install -y \
     cmake \
     ninja-build
 RUN uv run python -m pip install --break-system-packages tomlkit
-RUN git clone --depth=1 https://github.com/PennyLaneAI/pennylane-lightning.git /tmp/pl
+RUN git clone --depth=1 --branch "v${PENNYLANE_VERSION}" \
+    https://github.com/PennyLaneAI/pennylane-lightning.git /tmp/pl
 RUN cd /tmp/pl && \
     PL_BACKEND="lightning_qubit" uv run --no-project python scripts/configure_pyproject_toml.py && \
     CMAKE_ARGS="-DENABLE_OPENMP=OFF -DLQ_ENABLE_KERNEL_OMP=OFF" \
@@ -75,5 +82,8 @@ RUN cd /tmp/pl && \
     CMAKE_ARGS="-DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=OFF -DKokkos_ENABLE_CUDA=OFF -DKokkos_ENABLE_THREADS=OFF -DENABLE_OPENMP=OFF" \
         uv run --no-project python -m pip install --break-system-packages .
 RUN rm -r /tmp/pl
+# pin the PennyLane core to the same version (the source build pulls it as a
+# dependency and would otherwise grab a newer release)
+RUN uv run python -m pip install --break-system-packages "pennylane==${PENNYLANE_VERSION}"
 
 RUN uv run python -m pip install --break-system-packages matplotlib
