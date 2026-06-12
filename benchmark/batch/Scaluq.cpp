@@ -1,6 +1,7 @@
 #include "scaluq/all.hpp"
 #include <chrono>
 #include <cstdint>
+#include <cuda_runtime.h>
 #include <fstream>
 #include <iostream>
 #include <numbers>
@@ -102,13 +103,20 @@ int main(int argc, char *argv[]) {
     result.initialization_ms =
         std::chrono::duration<float, std::milli>(end_init - start_init).count();
 
-    Kokkos::fence();
-    auto start_upd = std::chrono::steady_clock::now();
+    // Measure the update loop with CUDA events to get GPU-side timestamps
+    // (no host-side overhead). Assumes Kokkos uses the default CUDA stream,
+    // which is the default Scaluq/Kokkos configuration.
+    cudaEvent_t ev_start, ev_stop;
+    CUDA_CHECK(cudaEventCreate(&ev_start));
+    CUDA_CHECK(cudaEventCreate(&ev_stop));
+    Kokkos::fence();  // ensure initialization kernels finished before timing
+    CUDA_CHECK(cudaEventRecord(ev_start));
     run_benchmark(circuit, states, config.n_iterations);
-    Kokkos::fence();
-    auto end_upd = std::chrono::steady_clock::now();
-    result.execution_ms =
-        std::chrono::duration<float, std::milli>(end_upd - start_upd).count();
+    CUDA_CHECK(cudaEventRecord(ev_stop));
+    CUDA_CHECK(cudaEventSynchronize(ev_stop));
+    CUDA_CHECK(cudaEventElapsedTime(&result.execution_ms, ev_start, ev_stop));
+    CUDA_CHECK(cudaEventDestroy(ev_start));
+    CUDA_CHECK(cudaEventDestroy(ev_stop));
 
     result.per_iteration_total_ms = (result.execution_ms + result.initialization_ms) / config.n_iterations;
 
