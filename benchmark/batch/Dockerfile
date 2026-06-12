@@ -17,5 +17,7 @@ RUN wget https://developer.download.nvidia.com/compute/cuquantum/redist/cuquantu
     tar -xf cuquantum-linux-x86_64-24.08.0.5_cuda12-archive.tar.xz
 
 ENV CUQUANTUM_ROOT=/opt/cuquantum-linux-x86_64-24.08.0.5_cuda12-archive
+# so the cuStateVec executable finds libcustatevec.so.1 at runtime
+ENV LD_LIBRARY_PATH=${CUQUANTUM_ROOT}/lib:${LD_LIBRARY_PATH}
 
 WORKDIR /workspace
