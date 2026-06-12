@@ -2,11 +2,12 @@
 # Build with:
 #   docker build -f Dockerfile -t bench-scaluq .
 # then enter it via run_container.sh.
-FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
+FROM nvidia/cuda:12.6.3-devel-ubuntu24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# ninja-build is required by build_Scaluq.sh (cmake -G Ninja)
+# Ubuntu 24.04 ships CMake >= 3.28 (CMakeLists.txt requires 3.24).
+# ninja-build is required by build_Scaluq.sh (cmake -G Ninja).
 RUN apt-get update && apt-get install -y \
     git cmake make ninja-build wget tar
 
