@@ -132,13 +132,13 @@ int main(int argc, char *argv[]) {
   std::mt19937 mt(seed);
   std::uniform_real_distribution<double> distribution(0.0, 2.0 * M_PI);
   std::vector<double> angles1(n_batches), angles2(n_batches);
+  // distinct per-batch angles (same draw order as the Scaluq benchmark:
+  // B values for RX, then B values for RZ, per gate)
   for (int i = 0; i < n_layers * n_qubits; i++) {
-    angles1[0] = distribution(mt);
-    angles2[0] = distribution(mt);
-    for (int j = 0; j < n_batches - 1; j++) {
-      angles1[j + 1] = angles1[j];
-      angles2[j + 1] = angles2[j];
-    }
+    for (int j = 0; j < n_batches; j++)
+      angles1[j] = distribution(mt);
+    for (int j = 0; j < n_batches; j++)
+      angles2[j] = distribution(mt);
     make_rx(pxs[i], angles1);
     make_rz(pzs[i], angles2);
   }
