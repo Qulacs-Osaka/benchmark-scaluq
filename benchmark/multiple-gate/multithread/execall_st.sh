@@ -4,9 +4,9 @@ set -eux
 # multi-thread sweep in execall.sh. Results are written to f64_st.json in each
 # library directory and plotted as dashed curves by plot.py.
 
-cd scaluq/
-./exec_st.sh f64
-cd -
+#cd scaluq/
+#./exec_st.sh f64
+#cd -
 cd qulacs/
 ./exec_st.sh f64
 cd -
