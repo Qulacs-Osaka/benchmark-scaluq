@@ -4,18 +4,18 @@ set -eux
 # multi-thread sweep in execall.sh. Results are written to f64_st.json in each
 # library directory and plotted as dashed curves by plot.py.
 
-#cd scaluq/
-#./exec_st.sh f64
-#cd -
-cd qulacs/
+cd scaluq/
 ./exec_st.sh f64
 cd -
+#cd qulacs/
+#./exec_st.sh f64
+#cd -
 cd qiskit-aer/
 ./exec_st.sh f64
 cd -
-cd pennylane-lightning/
-./exec_st.sh f64
-cd -
-cd pennylane-lightning-kokkos/
-./exec_st.sh f64
-cd -
+#cd pennylane-lightning/
+#./exec_st.sh f64
+#cd -
+#cd pennylane-lightning-kokkos/
+#./exec_st.sh f64
+#cd -
