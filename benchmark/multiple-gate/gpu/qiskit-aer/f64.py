@@ -5,7 +5,7 @@ from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from qiskit.compiler import transpile
 
-nqubits_list = list(range(4, 26))
+nqubits_list = list(range(4, 28))
 
 # See multithread/qiskit-aer/f64.py: the 100 layer repetitions go into one
 # circuit and one run(), so orchestration + the single device->host
