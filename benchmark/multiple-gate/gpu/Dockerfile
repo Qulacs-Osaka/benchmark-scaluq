@@ -83,26 +83,15 @@ RUN rm -r /tmp/scaluq
 # install custatevec
 RUN uv run --no-project python -m pip install --break-system-packages cupy-cuda12x cuquantum-python-cu12 custatevec-cu12
 
-# install PennyLane GPU devices: lightning.kokkos (Kokkos CUDA backend, built
-# from source for A100/sm_80) and lightning.gpu (cuStateVec, prebuilt wheel).
-RUN uv run python -m pip install --break-system-packages build cmake ninja tomlkit "pennylane==${PENNYLANE_VERSION}"
-RUN git clone --depth=1 --branch "v${PENNYLANE_VERSION}" \
-    https://github.com/PennyLaneAI/pennylane-lightning.git /tmp/pl
-# base package (compilation skipped) — prerequisite for the lightning_kokkos build
-RUN cd /tmp/pl && \
-    PL_BACKEND="lightning_qubit" uv run --no-project python scripts/configure_pyproject_toml.py && \
-    SKIP_COMPILATION=True uv run --no-project python -m pip install --break-system-packages .
-# lightning.kokkos with the Kokkos CUDA backend (A100 = AMPERE80); needs no cuQuantum
-RUN cd /tmp/pl && \
-    PL_BACKEND="lightning_kokkos" uv run --no-project python scripts/configure_pyproject_toml.py && \
-    CMAKE_ARGS="-DKokkos_ENABLE_CUDA=ON -DKokkos_ARCH_AMPERE80=ON -DKokkos_ENABLE_SERIAL=ON -DCMAKE_CXX_STANDARD=20" \
-        uv run --no-project python -m pip install --break-system-packages .
-RUN rm -r /tmp/pl
-# restore the compiled lightning.qubit base (the step above skipped compilation),
-# then add lightning.gpu (cuStateVec) from its prebuilt wheel
-RUN uv run python -m pip install --break-system-packages --force-reinstall --no-deps \
-    "pennylane-lightning==${PENNYLANE_VERSION}"
-RUN uv run python -m pip install --break-system-packages "pennylane-lightning-gpu==${PENNYLANE_VERSION}"
+# install PennyLane Lightning-GPU (cuStateVec) from its prebuilt wheel.
+# NOTE: Lightning-Kokkos with the Kokkos CUDA backend was dropped -- building it
+# from source did not finish in a reasonable time (Kokkos CUDA kernel
+# compilation), and Scaluq already represents a Kokkos-CUDA implementation on
+# GPU, so the lightning.kokkos-CUDA curve would be largely redundant.
+RUN uv run python -m pip install --break-system-packages \
+    "pennylane==${PENNYLANE_VERSION}" \
+    "pennylane-lightning==${PENNYLANE_VERSION}" \
+    "pennylane-lightning-gpu==${PENNYLANE_VERSION}"
 #
 # # install QuEST
 # RUN git clone https://github.com/rrmeister/pyquest -b develop --depth=1 --recursive /tmp/pyquest

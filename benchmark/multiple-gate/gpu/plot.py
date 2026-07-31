@@ -6,10 +6,10 @@ import os
 
 #libs = ["scaluq", "qulacs", "qiskit-aer", "qiskit-aer-custatevec", "custatevec"]
 #libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Qiskit-Aer with cuStateVec", "cuStateVec"]
-libs = ["scaluq", "qulacs", "custatevec", "qiskit-aer", "pennylane-lightning-gpu", "pennylane-lightning-kokkos"]
-libnames = ["Scaluq", "Qulacs", "cuStateVec", "Qiskit-Aer", "Lightning-GPU", "Lightning-Kokkos"]
-markers = ['P', 'o', '^', 's', 'D', 'X']
-colors = ['tab:red', 'tab:blue', 'tab:gray', "tab:green", "tab:purple", "tab:orange"]
+libs = ["scaluq", "qulacs", "custatevec", "qiskit-aer", "pennylane-lightning-gpu"]
+libnames = ["Scaluq", "Qulacs", "cuStateVec", "Qiskit-Aer", "Lightning-GPU"]
+markers = ['P', 'o', '^', 's', 'D']
+colors = ['tab:red', 'tab:blue', 'tab:gray', "tab:green", "tab:purple"]
 only_f64 = True
 
 def load():

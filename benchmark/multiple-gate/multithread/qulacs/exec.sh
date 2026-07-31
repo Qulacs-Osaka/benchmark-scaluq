@@ -1,5 +1,5 @@
 # Default thread count when run standalone (execall.sh exports its own value).
-: "${OMP_NUM_THREADS:=32}"
+: "${OMP_NUM_THREADS:=96}"
 export OMP_NUM_THREADS
 
 rm -f "$1.json"

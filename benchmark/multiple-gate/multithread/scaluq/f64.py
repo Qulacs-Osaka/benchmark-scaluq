@@ -3,7 +3,7 @@ import pytest
 import random
 import math
 import scaluq as scaluqbase
-if os.environ.get("OMP_NUM_THREADS", "32") == "1":
+if os.environ.get("OMP_NUM_THREADS", "96") == "1":
     from scaluq.host_serial.f64 import StateVector
 else:
     from scaluq.default.f64 import StateVector

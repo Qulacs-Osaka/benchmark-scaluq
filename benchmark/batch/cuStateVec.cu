@@ -132,13 +132,13 @@ int main(int argc, char *argv[]) {
   std::mt19937 mt(seed);
   std::uniform_real_distribution<double> distribution(0.0, 2.0 * M_PI);
   std::vector<double> angles1(n_batches), angles2(n_batches);
+  // distinct per-batch angles (same draw order as the Scaluq benchmark:
+  // B values for RX, then B values for RZ, per gate)
   for (int i = 0; i < n_layers * n_qubits; i++) {
-    angles1[0] = distribution(mt);
-    angles2[0] = distribution(mt);
-    for (int j = 0; j < n_batches - 1; j++) {
-      angles1[j + 1] = angles1[j];
-      angles2[j + 1] = angles2[j];
-    }
+    for (int j = 0; j < n_batches; j++)
+      angles1[j] = distribution(mt);
+    for (int j = 0; j < n_batches; j++)
+      angles2[j] = distribution(mt);
     make_rx(pxs[i], angles1);
     make_rz(pzs[i], angles2);
   }
@@ -173,8 +173,13 @@ int main(int argc, char *argv[]) {
   float diff_init =
       std::chrono::duration<float, std::milli>(end_init - start_init).count();
 
+  // Measure the update loop with CUDA events for GPU-side timestamps
+  // (no host-side overhead). cuStateVec runs on the handle's default stream.
+  cudaEvent_t ev_start, ev_stop;
+  CUDA_CHECK(cudaEventCreate(&ev_start));
+  CUDA_CHECK(cudaEventCreate(&ev_stop));
   cudaDeviceSynchronize();
-  auto start_upd = std::chrono::steady_clock::now();
+  CUDA_CHECK(cudaEventRecord(ev_start));
 
   for (int itr = 0; itr < n_iterations; itr++) {
     for (int layer = 0; layer < n_layers; layer++) {
@@ -215,10 +220,12 @@ int main(int argc, char *argv[]) {
   }
 
   // end measuring update
-  cudaDeviceSynchronize();
-  auto end_upd = std::chrono::steady_clock::now();
-  float diff_upd =
-      std::chrono::duration<double, std::milli>(end_upd - start_upd).count();
+  CUDA_CHECK(cudaEventRecord(ev_stop));
+  CUDA_CHECK(cudaEventSynchronize(ev_stop));
+  float diff_upd = 0.f;
+  CUDA_CHECK(cudaEventElapsedTime(&diff_upd, ev_start, ev_stop));
+  CUDA_CHECK(cudaEventDestroy(ev_start));
+  CUDA_CHECK(cudaEventDestroy(ev_stop));
 
   std::cout << "initialize time: " << diff_init << " [ms]" << std::endl;
   std::cout << "update time: " << diff_upd << " [ms]" << std::endl;

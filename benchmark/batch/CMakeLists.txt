@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.24)
 
 project(bench LANGUAGES CXX CUDA)
 
+# CUDA runtime, for the cudaEvent_t timing in Scaluq.cpp (compiled as C++)
+find_package(CUDAToolkit REQUIRED)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CUDA_STANDARD 20)
 # Set your architecture. For example RTX 3060 (Ampere, CC 8.6)
@@ -26,6 +29,7 @@ function(exe name)
         Eigen3::Eigen
         Kokkos::kokkos
         nlohmann_json::nlohmann_json
+        CUDA::cudart
     )
 
     target_include_directories(${name} PRIVATE
