@@ -14,9 +14,11 @@ BATCHES=100
 "$CUSTATEVEC_BIN" 15 "$BATCHES" /tmp/warmup_custatevec.csv
 "$SCALUQ_BIN" 15 "$BATCHES" /tmp/warmup_scaluq.csv
 
-echo "=== Qubits sweep: n_qubits = 4..25, n_batches = ${BATCHES} ==="
+# Upper limit is 24: at n_batches=100, n=25 needs 2^25*100*16 B ~= 54 GB,
+# exceeding the 40 GB of an A100 (n=24 ~= 27 GB fits).
+echo "=== Qubits sweep: n_qubits = 4..24, n_batches = ${BATCHES} ==="
 
-for NQ in {4..25}; do
+for NQ in {4..24}; do
     echo "--- custatevec: n_qubits=${NQ}, n_batches=${BATCHES}"
     "$CUSTATEVEC_BIN" "$NQ" "$BATCHES" "$CSV_PATH"
 

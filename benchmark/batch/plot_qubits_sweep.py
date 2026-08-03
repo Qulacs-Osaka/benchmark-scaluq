@@ -21,7 +21,7 @@ csv_file = sys.argv[1]
 df = pd.read_csv(csv_file)
 
 name_map = {
-    "scaluq": "Proposal",
+    "scaluq": "Scaluq",
     "custatevec": "cuStateVec",
 }
 
@@ -54,4 +54,4 @@ plt.xticks(range(min_q, max_q + 1, 2))
 plt.grid(True, which="both", linestyle="--", linewidth=0.5)
 plt.legend()
 plt.tight_layout()
-plt.savefig("qubits_sweep.png", dpi=300)
+plt.savefig("image/qubits_sweep.png", dpi=300)

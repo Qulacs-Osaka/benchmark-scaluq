@@ -1,0 +1,15 @@
+impl,n_qubits,n_batches,n_iterations,seed,per_iteration_ms
+custatevec,16,1,100,0,0.506225
+scaluq,16,1,100,0,1.86905
+custatevec,16,50,100,0,3.60145
+scaluq,16,50,100,0,2.56609
+custatevec,16,100,100,0,6.87289
+scaluq,16,100,100,0,3.30643
+custatevec,16,150,100,0,10.0547
+scaluq,16,150,100,0,4.05757
+custatevec,16,200,100,0,13.2307
+scaluq,16,200,100,0,4.79537
+custatevec,16,250,100,0,16.4333
+scaluq,16,250,100,0,5.50127
+custatevec,16,300,100,0,19.6199
+scaluq,16,300,100,0,6.25921

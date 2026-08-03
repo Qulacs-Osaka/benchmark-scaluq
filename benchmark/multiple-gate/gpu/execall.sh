@@ -8,9 +8,9 @@ cd -
 cd qiskit-aer/
 ./exec.sh f64
 cd -
-cd qiskit-aer-custatevec/
+cd custatevec/
 ./exec.sh f64
 cd -
-cd custatevec/
+cd pennylane-lightning-gpu/
 ./exec.sh f64
 cd -

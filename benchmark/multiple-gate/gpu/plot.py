@@ -6,8 +6,8 @@ import os
 
 #libs = ["scaluq", "qulacs", "qiskit-aer", "qiskit-aer-custatevec", "custatevec"]
 #libnames = ["Sclauq", "Qulacs", "Qiskit-Aer", "Qiskit-Aer with cuStateVec", "cuStateVec"]
-libs = ["scaluq", "qulacs", "custatevec", "qiskit-aer"]
-libnames = ["Proposal", "Qulacs", "cuStateVec", "Qiskit-Aer"]
+libs = ["scaluq", "qulacs", "custatevec", "qiskit-aer", "pennylane-lightning-gpu"]
+libnames = ["Scaluq", "Qulacs", "cuStateVec", "Qiskit-Aer", "Lightning-GPU"]
 markers = ['P', 'o', '^', 's', 'D']
 colors = ['tab:red', 'tab:blue', 'tab:gray', "tab:green", "tab:purple"]
 only_f64 = True
@@ -28,7 +28,7 @@ def load():
             else:
                 filepaths.append((f'{libname} ({prec})', filepath))
 
-    dat1 = defaultdict(lambda: defaultdict(dict))
+    dat = defaultdict(lambda: defaultdict(dict))
     for name, filepath in filepaths:
         print(filepath)
         data = json.load(open(filepath))
@@ -36,50 +36,35 @@ def load():
         for item in items:
             group = item["group"]
             nqubits = int(item["params"]["nqubits"])
-            stats = item["stats"]
-            dat1[group][name][nqubits] = stats["mean"]
-    dat = defaultdict(lambda: defaultdict(dict))
-    for group in dat1:
-        for name in dat1[group]:
-            for nqubits in dat1[group][name]:
-                dat[group][name][nqubits] = dat1[group][name][nqubits] / (nqubits * 100) * 1000
+            # number of layer repetitions per timed call (default 100 for older
+            # results that did not record it); each layer = nqubits * 3 gates
+            # (CX, RX, RZ) -> normalize to milliseconds per single gate.
+            niter = item.get("extra_info", {}).get("niter", 100)
+            dat[group][name][nqubits] = item["stats"]["median"] / (nqubits * niter * 3) * 1000
     return dat
 
 
 def plot(dat, group):
     assert len(group) > 0
     dat_group = dat[group]
-    cmap = plt.get_cmap("tab10")
-    for name in dat_group:
+    names = list(dat_group.keys())
+    names.sort(key=lambda n: n == "Scaluq")  # draw Scaluq last so it sits on top
+    for name in names:
+        cid = libnames.index(name)
         xs = list(sorted(dat_group[name].keys()))
         ys = [dat_group[name][x] for x in xs]
-        linestyle = 'solid'
-        if name.count('('):
-            cid = libnames.index(name[:name.index(' (')])
-            if name.count('(f64)'):
-                linestyle = 'solid'
-            if name.count('(f32)'):
-                linestyle = 'dashed'
-            if name.count('(f16)'):
-                linestyle = 'dashdot'
-            if name.count('(bf16)'):
-                linestyle = 'dotted'
-            if name.count('(cuStateVec)'):
-                linestyle = 'dashed'
-        else:
-            cid = libnames.index(name)
-        plt.plot(xs, ys, label=name, c=colors[cid], linestyle=linestyle, marker=markers[cid])
+        # all libraries drawn uniformly; Scaluq only placed on top (zorder)
+        plt.plot(xs, ys, label=name, c=colors[cid], marker=markers[cid],
+                 linewidth=1.6, markersize=6,
+                 zorder=5 if name == "Scaluq" else 3)
 
-    #plt.title(f"{group} Gate apply@Nvidia A100 40 GB")
     plt.yscale("log")
     plt.grid(which='major', color='black', linestyle='-', alpha=0.3)
     plt.grid(which='minor', color='black', linestyle='-', alpha=0.1)
     plt.xlabel("Number of qubits", fontsize=16)
-    plt.ylabel("Execution time per iteration [ms]", fontsize=16)
+    plt.ylabel("Execution time per gate [ms]", fontsize=16)
     plt.xticks(fontsize=16)
     plt.yticks(fontsize=16)
-
-
 
 
 if __name__ == "__main__":
@@ -89,9 +74,9 @@ if __name__ == "__main__":
         plt.rcParams["font.size"] = 18
         plt.figure(figsize=(7, 5))
         plot(dat, group)
-        plt.legend(fontsize=18)
+        plt.legend(fontsize=14, loc='upper left')
         plt.tight_layout()
-        #plt.savefig(f"./image/{group}.pdf")
-        plt.savefig(f"./image/{group}.png", dpi=300)
+        #plt.savefig(f"./image/{group}_gpu.pdf")
+        plt.savefig(f"./image/{group}_gpu.png", dpi=300)
         plt.clf()
 

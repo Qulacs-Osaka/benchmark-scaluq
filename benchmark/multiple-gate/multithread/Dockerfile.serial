@@ -1,0 +1,89 @@
+# Image for the SINGLE-THREAD benchmark (execall_st.sh).
+#
+# Goal: every library runs genuinely serial, with NO OpenMP-runtime per-region
+# overhead, so the comparison is fair against Scaluq's Kokkos::Serial backend
+# (scaluq.host_serial, selected in f64.py when OMP_NUM_THREADS=1).
+#
+#   - Scaluq:     host_serial (Kokkos::Serial) backend -> no OpenMP. Same install
+#                 as the multi image; the backend is chosen at runtime in f64.py.
+#   - Qiskit-Aer: NO rebuild needed. Its gate loop is guarded by
+#                 `if (omp_threads > 1) { #pragma omp parallel } else { serial }`,
+#                 so max_parallel_threads=1 (set via OMP_NUM_THREADS=1 in
+#                 exec_st.sh) takes a genuinely serial path with no fork/join.
+#   - Qulacs:     MUST be rebuilt with USE_OMP=No, because its kernels use an
+#                 unconditional `#pragma omp parallel for`; OMP_NUM_THREADS=1
+#                 alone still enters the parallel region. USE_OMP=No compiles the
+#                 OpenMP code out entirely (#ifdef _OPENMP).
+#   - PennyLane:  the PyPI wheels are OpenMP, so build from source single-thread:
+#                 lightning.qubit with -DENABLE_OPENMP=OFF, lightning.kokkos with
+#                 the Kokkos Serial backend (no OpenMP).
+#
+# The multi-thread sweep (execall.sh) must still use the regular Dockerfile,
+# where Qulacs is built WITH OpenMP. Build both images from the same library
+# versions so only the threading differs.
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Pinned versions, matching the multi-thread Dockerfile so only the threading
+# (OpenMP on/off) differs (override with --build-arg to bump).
+ARG QULACS_COMMIT=4f6de32cca807ec4cabf1107e3806786cb953c56
+ARG PENNYLANE_VERSION=0.45.0
+
+RUN apt-get update
+RUN apt-get install -y \
+    ca-certificates \
+    curl \
+    git \
+    wget
+
+# install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+RUN uv python install 3.12 --default
+
+# install pytest-benchmark
+RUN uv run python -m pip install --break-system-packages pytest-benchmark
+
+# install qulacs WITHOUT OpenMP (single-thread build): USE_OMP=No removes the
+# OpenMP code paths entirely so there is no per-gate parallel-region overhead.
+RUN git clone https://github.com/qulacs/qulacs /tmp/qulacs
+RUN git -C /tmp/qulacs checkout "${QULACS_COMMIT}"
+RUN apt-get update
+RUN apt-get install -y \
+    build-essential \
+    cmake \
+    libboost-dev
+RUN cd /tmp/qulacs && \
+    USE_OMP=No uv run --no-project python -m pip install --break-system-packages .
+RUN rm -r /tmp/qulacs
+
+# install PennyLane Lightning as TRUE single-thread builds (no OpenMP), to match
+# Scaluq host_serial / Qulacs USE_OMP=No. The PyPI wheels are OpenMP, so build
+# from the monorepo source. lightning.qubit: -DENABLE_OPENMP=OFF. lightning.kokkos:
+# Kokkos Serial backend (no OpenMP/CUDA). lightning_qubit is the base package and
+# must be installed before lightning_kokkos. The monorepo selects the backend via
+# PL_BACKEND + scripts/configure_pyproject_toml.py; setup.py reads CMAKE_ARGS.
+# (Do NOT install libomp-dev; keep no Kokkos preinstalled so Serial is built.)
+RUN apt-get update
+RUN apt-get install -y \
+    build-essential \
+    cmake \
+    ninja-build
+RUN uv run python -m pip install --break-system-packages tomlkit
+RUN git clone --depth=1 --branch "v${PENNYLANE_VERSION}" \
+    https://github.com/PennyLaneAI/pennylane-lightning.git /tmp/pl
+RUN cd /tmp/pl && \
+    PL_BACKEND="lightning_qubit" uv run --no-project python scripts/configure_pyproject_toml.py && \
+    CMAKE_ARGS="-DENABLE_OPENMP=OFF -DLQ_ENABLE_KERNEL_OMP=OFF" \
+        uv run --no-project python -m pip install --break-system-packages .
+RUN cd /tmp/pl && \
+    PL_BACKEND="lightning_kokkos" uv run --no-project python scripts/configure_pyproject_toml.py && \
+    CMAKE_ARGS="-DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=OFF -DKokkos_ENABLE_CUDA=OFF -DKokkos_ENABLE_THREADS=OFF -DENABLE_OPENMP=OFF" \
+        uv run --no-project python -m pip install --break-system-packages .
+RUN rm -r /tmp/pl
+# pin the PennyLane core to the same version (the source build pulls it as a
+# dependency and would otherwise grab a newer release)
+RUN uv run python -m pip install --break-system-packages "pennylane==${PENNYLANE_VERSION}"
+
+RUN uv run python -m pip install --break-system-packages matplotlib

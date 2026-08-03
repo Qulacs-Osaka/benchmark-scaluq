@@ -21,7 +21,7 @@ csv_file = sys.argv[1]
 df = pd.read_csv(csv_file)
 
 name_map = {
-    "scaluq": "Proposal",
+    "scaluq": "Scaluq",
     "custatevec": "cuStateVec",
 }
 
@@ -49,4 +49,4 @@ plt.ylabel("Execution time per iteration [ms]")
 plt.grid(True, which="both", linestyle="--", linewidth=0.5)
 plt.legend()
 plt.tight_layout()
-plt.savefig("batch_sweep.png", dpi=300)
+plt.savefig("image/batch_sweep.png", dpi=300)
